@@ -11,6 +11,9 @@ from drf_yasg import openapi
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from rest_framework.routers import DefaultRouter
+from django.conf import settings
+from django.conf.urls.static import static
+
 router = DefaultRouter()
 
 schema_view = get_schema_view(
@@ -35,7 +38,8 @@ urlpatterns = [
 
     # Приложения
     path('api/movies/', include('movies.urls')),
-
+    path('api/showtimes/', include('showtimes.urls')),
+    path('api/cinema/', include('cinema.urls')),
     # Swagger документация
     path('swagger/', schema_view.with_ui('swagger',
          cache_timeout=0), name='schema-swagger-ui'),
@@ -43,3 +47,5 @@ urlpatterns = [
          cache_timeout=0), name='schema-redoc'),
     path('', include(router.urls)),
 ]
+
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

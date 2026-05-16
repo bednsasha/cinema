@@ -49,18 +49,25 @@ class HallScreen(models.Model):
     def __str__(self):
         return f'{self.hall.name} - {self.screen_type.name}'
 
-
+class SeatType(models.Model):
+    name = models.CharField(max_length=20, unique=True, verbose_name='Название')
+    display_name = models.CharField(max_length=50, verbose_name='Отображаемое имя')
+    slug = models.SlugField(unique=True, blank=True)
+    
+    class Meta:
+        db_table = 'seat_types'
+        verbose_name = 'Тип места'
+        verbose_name_plural = 'Типы мест'
+    
+    def __str__(self):
+        return self.display_name
 class Seat(models.Model):
-    SEAT_TYPES = [
-        ('standard', 'Обычное'),
-        ('vip', 'VIP'),
-        ('sofa', 'Диванчик'),
-    ]
+    
     
     hall = models.ForeignKey(Hall, on_delete=models.CASCADE, related_name='seats')
     row_number = models.PositiveSmallIntegerField(verbose_name='Номер ряда')
     seat_number = models.PositiveSmallIntegerField(verbose_name='Номер места')
-    seat_type = models.CharField(max_length=20, choices=SEAT_TYPES, default='standard', verbose_name='Тип места')
+    seat_type = models.ForeignKey(SeatType, on_delete=models.PROTECT, verbose_name='Тип места')
     
     # Для визуализации
     position_x = models.IntegerField(verbose_name='X координата')

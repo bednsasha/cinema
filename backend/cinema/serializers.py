@@ -1,10 +1,18 @@
 from rest_framework import serializers
-from .models import Hall, Seat, ScreenType, HallScreen
+from .models import Hall, Seat, ScreenType, HallScreen, SeatType
+
+
+class SeatTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeatType
+        fields = ['id', 'name', 'display_name', 'slug']
+
 
 class ScreenTypeSerializer(serializers.ModelSerializer):
     class Meta:
         model = ScreenType
         fields = ['id', 'name', 'slug']
+
 
 class HallSerializer(serializers.ModelSerializer):
     screen_types = ScreenTypeSerializer(many=True, read_only=True)
@@ -13,10 +21,15 @@ class HallSerializer(serializers.ModelSerializer):
         model = Hall
         fields = ['id', 'name', 'slug', 'screen_types']
 
+
 class SeatSerializer(serializers.ModelSerializer):
-    seat_type_display = serializers.CharField(source='get_seat_type_display', read_only=True)
+    seat_type_detail = SeatTypeSerializer(source='seat_type', read_only=True)
+    hall_name = serializers.CharField(source='hall.name', read_only=True)
     
     class Meta:
         model = Seat
-        fields = ['id', 'row_number', 'seat_number', 'seat_type', 'seat_type_display',
-                  'position_x', 'position_y', 'width', 'height']
+        fields = [
+            'id', 'hall', 'hall_name', 'row_number', 'seat_number', 
+            'seat_type', 'seat_type_detail', 'position_x', 'position_y', 
+            'width', 'height'
+        ]

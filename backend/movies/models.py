@@ -37,8 +37,9 @@ class Film(models.Model):
     duration = models.PositiveIntegerField(verbose_name='Длительность (мин)')
     release_year = models.PositiveSmallIntegerField(verbose_name='Год выпуска')
     country = models.CharField(max_length=100, verbose_name='Страна')
-    poster = models.URLField(max_length=255, blank=True, verbose_name='Постер')
-    trailer = models.URLField(max_length=255, blank=True, verbose_name='Трейлер')
+    poster = models.ImageField(upload_to='film_posters/', blank=True, null=True, verbose_name='Постер')
+    trailer_video = models.FileField(upload_to='film_trailers/', blank=True, null=True, verbose_name='Трейлер (видео)')
+    trailer_url = models.URLField(max_length=255, blank=True, verbose_name='Трейлер')
     age_limit = models.CharField(max_length=3, choices=AGE_LIMITS, default='0+', verbose_name='Возрастное ограничение')
     
     genres = models.ManyToManyField(Genre, through='FilmGenre', related_name='films')
