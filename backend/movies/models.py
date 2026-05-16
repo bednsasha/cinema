@@ -1,6 +1,8 @@
 from django.db import models
 from django.utils.text import slugify
 
+from cinema.models import ScreenType
+
 class Genre(models.Model):
     name = models.CharField(max_length=50, unique=True, verbose_name='Название')
     slug = models.SlugField(max_length=50, unique=True, blank=True, verbose_name='Slug')
@@ -40,7 +42,11 @@ class Film(models.Model):
     age_limit = models.CharField(max_length=3, choices=AGE_LIMITS, default='0+', verbose_name='Возрастное ограничение')
     
     genres = models.ManyToManyField(Genre, through='FilmGenre', related_name='films')
-    
+    screen_formats = models.ManyToManyField(
+        ScreenType, 
+        through='FilmScreenFormat', 
+        related_name='film_formats'  
+    )
     class Meta:
         db_table = 'films'
         verbose_name = 'Фильм'
@@ -62,3 +68,24 @@ class FilmGenre(models.Model):
     
     def __str__(self):
         return f'{self.film.name} - {self.genre.name}'
+    
+class FilmScreenFormat(models.Model):
+    film = models.ForeignKey(
+        Film, 
+        on_delete=models.CASCADE, 
+        related_name='film_formats_through' 
+    )
+    screen_type = models.ForeignKey(
+        ScreenType, 
+        on_delete=models.CASCADE,
+        related_name='film_formats_through'
+    )
+    
+    class Meta:
+        db_table = 'film_screen_formats'
+        verbose_name = 'Формат экрана фильма'
+        verbose_name_plural = 'Форматы экранов фильмов'
+        unique_together = (('film', 'screen_type'),)
+    
+    def __str__(self):
+        return f'{self.film.name} - {self.screen_type.name}'
