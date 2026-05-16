@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
+import io
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
@@ -45,6 +47,8 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
+    'TOKEN_OBTAIN_SERIALIZER': 'users.serializers.CustomTokenObtainPairSerializer',
+    'TOKEN_ACCESS_CLASS': 'backend.auth.CustomAccessToken',
 }
 # Application definition
 
@@ -72,6 +76,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'backend.middleware.PasswordChangeMiddleware',
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -150,3 +155,12 @@ STATIC_URL = 'static/'
 # Заменить на CORS_ALLOWED_ORIGINS = [ "http://localhost:3000",]
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
+
+
+
+CACHES = {
+    'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache',
+        'LOCATION': 'unique-snowflake',
+    }
+}
