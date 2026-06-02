@@ -16,6 +16,7 @@ from pathlib import Path
 from dotenv import load_dotenv
 from datetime import timedelta
 import os
+from yookassa import Configuration
 load_dotenv()
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -59,13 +60,16 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'cinema',
     'users',
     'movies',
+    'cinema',
     'showtimes',
+    'cart',        
+    'payment',
     'corsheaders',
     'rest_framework',
     'django_filters',
+    'drf_yasg',
 ]
 
 MIDDLEWARE = [
@@ -158,7 +162,17 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 CORS_ALLOW_ALL_ORIGINS = True
 CORS_ALLOWS_CREDENTIALS = True
 
+# yookassa keys
+YOOKASSA_SHOP_ID = os.getenv('YOOKASSA_SHOP_ID')
+YOOKASSA_SECRET_KEY = os.getenv('YOOKASSA_SECRET_KEY')
+YOOKASSA_VAT_CODE = 1  # Код НДС (1 - без НДС)
 
+if YOOKASSA_SHOP_ID and YOOKASSA_SECRET_KEY:
+    Configuration.configure(YOOKASSA_SHOP_ID, YOOKASSA_SECRET_KEY)
+
+# URL для редиректа после оплаты
+PAYMENT_SUCCESS_URL = os.getenv('PAYMENT_SUCCESS_URL', 'http://localhost:3000/payment/success')
+PAYMENT_CANCEL_URL = os.getenv('PAYMENT_CANCEL_URL', 'http://localhost:3000/payment/cancel')
 
 CACHES = {
     'default': {

@@ -83,4 +83,4 @@ class Seat(models.Model):
         ordering = ['hall', 'row_number', 'seat_number']
     
     def __str__(self):
-        return f'{self.hall.name} - Ряд {self.row_number}, Место {self.seat_number} ({self.get_seat_type_display()})'
+        return f'{self.hall.name} - Ряд {self.row_number}, Место {self.seat_number} ({self.seat_type.display_name})'

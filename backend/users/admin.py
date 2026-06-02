@@ -1,4 +1,3 @@
-# users/admin.py
 from django.contrib import admin
 from django.contrib.auth.hashers import make_password
 from .models import Customer

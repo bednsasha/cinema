@@ -16,7 +16,6 @@ class FilmAdmin(admin.ModelAdmin):
     list_filter = ['release_year', 'age_limit', 'country', 'genres']
     search_fields = ['name', 'director', 'country']
     readonly_fields = ['created_at'] if hasattr(Film, 'created_at') else []
-    filter_horizontal = []  
     inlines = [FilmGenreInline, FilmScreenFormatInline]
     fieldsets = (
         ('Основная информация', {
@@ -26,15 +25,17 @@ class FilmAdmin(admin.ModelAdmin):
             'fields': ('rating', 'age_limit')
         }),
         ('Медиа', {
-            'fields': ('poster', 'trailer')
+            'fields': ('poster', 'trailer_video', 'trailer_url')  # ← исправлено!
         }),
     )
+
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'slug']
     search_fields = ['name']
     prepopulated_fields = {'slug': ('name',)}
+
 
 @admin.register(FilmScreenFormat)
 class FilmScreenFormatAdmin(admin.ModelAdmin):

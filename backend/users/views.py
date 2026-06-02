@@ -230,7 +230,6 @@ class ResendCodeView(generics.GenericAPIView):
             status=status.HTTP_400_BAD_REQUEST
         )
 
-# users/views.py
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
