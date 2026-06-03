@@ -18,9 +18,10 @@ from .serializers import (
     ResetPasswordSerializer
 )
 
+# users/views.py - замени RegisterView
 
 class RegisterView(generics.GenericAPIView):
-    """Регистрация - отправка кода в консоль"""
+    """Простая регистрация без подтверждения email"""
     permission_classes = [AllowAny]
     serializer_class = CustomerRegistrationSerializer
 
@@ -28,71 +29,8 @@ class RegisterView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        email = serializer.validated_data['email']
-        first_name = serializer.validated_data['first_name']
-        code = generate_verification_code()
-
-        # Сохраняем код и данные во временное хранилище
-        request.session['reg_data'] = {
-            'code': code,
-            'data': serializer.validated_data,
-            'created_at': timezone.now().timestamp()
-        }
-
-        # Выводим код в консоль
-        print_verification_code(email, first_name, code, 'registration')
-
-        return Response(
-            {"message": f"Код подтверждения отправлен на email {email} (проверьте консоль)", "email": email},
-            status=status.HTTP_200_OK
-        )
-
-
-class VerifyEmailView(generics.GenericAPIView):
-    """Подтверждение email и создание пользователя"""
-    permission_classes = [AllowAny]
-    serializer_class = VerifyEmailSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        code = serializer.validated_data['code']
-
-        # Получаем данные из сессии
-        reg_data = request.session.get('reg_data')
-
-        if not reg_data:
-            return Response(
-                {"error": "Сессия регистрации не найдена. Начните регистрацию заново."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Проверяем код
-        if reg_data['code'] != code:
-            return Response(
-                {"error": "Неверный код подтверждения"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Проверяем время (10 минут)
-        created_at = reg_data['created_at']
-        if timezone.now().timestamp() - created_at > 600:
-            del request.session['reg_data']
-            return Response(
-                {"error": "Время подтверждения истекло. Зарегистрируйтесь заново."},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Проверяем, не создан ли пользователь
-        if Customer.objects.filter(email__iexact=reg_data['data']['email']).exists():
-            del request.session['reg_data']
-            return Response(
-                {"error": "Пользователь с таким email уже существует"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Создаём пользователя
-        user_data = reg_data['data']
+        user_data = serializer.validated_data
+        
         user = Customer.objects.create(
             email=user_data['email'],
             phone=user_data['phone'],
@@ -101,20 +39,16 @@ class VerifyEmailView(generics.GenericAPIView):
             patronimic=user_data.get('patronimic', ''),
             receive_newsletter=user_data.get('receive_newsletter', False),
             password=make_password(user_data['password']),
-            is_email_verified=True
+            is_email_verified=True  # Сразу подтверждён
         )
-
-        # Очищаем сессию
-        del request.session['reg_data']
 
         return Response(
             {
-                "message": "Регистрация успешно завершена! Теперь вы можете войти.",
+                "message": "Регистрация успешно завершена!",
                 "user": CustomerSerializer(user).data
             },
             status=status.HTTP_201_CREATED
         )
-
 
 class ChangePasswordView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
@@ -177,58 +111,6 @@ class ResetPasswordView(generics.GenericAPIView):
             status=status.HTTP_200_OK
         )
 
-
-class ResendCodeView(generics.GenericAPIView):
-    """Повторная отправка кода (для регистрации ИЛИ восстановления)"""
-    permission_classes = [AllowAny]
-    serializer_class = ResendCodeSerializer
-
-    def post(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        email = serializer.validated_data['email']
-        user_exists = serializer.user_exists
-
-        # Проверяем, есть ли активная сессия регистрации
-        reg_data = request.session.get('reg_data')
-
-        if reg_data and reg_data['data'].get('email') == email:
-            # Сценарий: повторная отправка кода при регистрации
-            new_code = generate_verification_code()
-            reg_data['code'] = new_code
-            reg_data['created_at'] = timezone.now().timestamp()
-            request.session['reg_data'] = reg_data
-
-            first_name = reg_data['data'].get('first_name', 'пользователь')
-            print_verification_code(
-                email, first_name, new_code, 'registration')
-
-            return Response(
-                {"message": f"Новый код подтверждения отправлен на email {email} (проверьте консоль)"},
-                status=status.HTTP_200_OK
-            )
-
-        elif user_exists:
-            # Сценарий: повторная отправка кода при восстановлении пароля
-            try:
-                user = Customer.objects.get(email__iexact=email)
-                new_code = user.set_reset_code()
-                print_verification_code(
-                    email, user.first_name, new_code, 'password_reset')
-
-                return Response(
-                    {"message": f"Новый код восстановления отправлен на email {email} (проверьте консоль)"},
-                    status=status.HTTP_200_OK
-                )
-            except Customer.DoesNotExist:
-                pass
-
-        # Если ничего не подошло
-        return Response(
-            {"error": "Не удалось отправить код. Начните процесс заново."},
-            status=status.HTTP_400_BAD_REQUEST
-        )
 
 
 

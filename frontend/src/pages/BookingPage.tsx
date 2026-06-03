@@ -1,7 +1,7 @@
 // src/pages/BookingPage.tsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { sessionAPI, hallAPI, cartAPI } from '../services/api';
+import { sessionAPI, hallAPI, cartAPI, authAPI } from '../services/api';
 import type { Session, Seat } from '../types';
 
 interface SeatTypeDetail {
@@ -41,11 +41,11 @@ export default function BookingPage() {
   const [session, setSession] = useState<Session | null>(null);
   const [seats, setSeats] = useState<SeatWithStatus[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedSeats, setSelectedSeats] = useState<SeatWithStatus[]>([]);
   const [cart, setCart] = useState<Cart | null>(null);
   const [showCart, setShowCart] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
+  // Загружаем данные
   useEffect(() => {
     if (sessionId) {
       loadSessionData();
@@ -55,6 +55,11 @@ export default function BookingPage() {
   const loadSessionData = async () => {
     try {
       setLoading(true);
+      
+      // Проверяем авторизацию
+      const hasToken = authAPI.isAuthenticated();
+      console.log('Has token:', hasToken);
+      setIsAuthenticated(hasToken);
       
       // Получаем информацию о сеансе
       const sessionRes = await sessionAPI.getById(Number(sessionId));
@@ -78,20 +83,21 @@ export default function BookingPage() {
         console.log('Could not fetch booked seats');
       }
       
-      // Пытаемся получить корзину
+      // Пытаемся получить корзину ТОЛЬКО если авторизованы
       let cartData: Cart | null = null;
       let cartSeatIds: number[] = [];
       
-      try {
-        const cartRes = await cartAPI.getCart();
-        cartData = cartRes.data;
-        cartSeatIds = cartData?.bookings?.map((booking: CartBooking) => booking.seat) || [];
-        setCart(cartData);
-        setIsAuthenticated(true);
-      } catch (error: any) {
-        if (error.response?.status === 401) {
-          setIsAuthenticated(false);
-          console.log('User not authenticated - showing read-only mode');
+      if (hasToken) {
+        try {
+          const cartRes = await cartAPI.getCart();
+          cartData = cartRes.data;
+          cartSeatIds = cartData?.bookings?.map((booking: CartBooking) => booking.seat) || [];
+          setCart(cartData);
+        } catch (error: any) {
+          if (error.response?.status === 401) {
+            console.log('User not authenticated - showing read-only mode');
+            setIsAuthenticated(false);
+          }
         }
       }
       
@@ -104,7 +110,6 @@ export default function BookingPage() {
       }));
       
       setSeats(seatsWithStatus);
-      setSelectedSeats(seatsWithStatus.filter((seat: SeatWithStatus) => seat.isSelected));
       
     } catch (error) {
       console.error('Error loading session:', error);
@@ -114,7 +119,9 @@ export default function BookingPage() {
   };
 
   const handleSeatClick = async (seat: SeatWithStatus) => {
-    if (!isAuthenticated) {
+    // Проверяем авторизацию при клике
+    if (!authAPI.isAuthenticated()) {
+      localStorage.setItem('redirectAfterLogin', window.location.pathname);
       alert('Для выбора мест необходимо войти в систему');
       navigate('/login');
       return;
@@ -131,7 +138,6 @@ export default function BookingPage() {
         setSeats((prev: SeatWithStatus[]) => prev.map((s: SeatWithStatus) => 
           s.id === seat.id ? { ...s, isSelected: false, bookingId: undefined } : s
         ));
-        setSelectedSeats((prev: SeatWithStatus[]) => prev.filter((s: SeatWithStatus) => s.id !== seat.id));
         
       } else {
         const response = await cartAPI.addToCart(Number(sessionId), seat.id);
@@ -139,16 +145,22 @@ export default function BookingPage() {
         setSeats((prev: SeatWithStatus[]) => prev.map((s: SeatWithStatus) => 
           s.id === seat.id ? { ...s, isSelected: true, bookingId: response.data.booking_id } : s
         ));
-        setSelectedSeats((prev: SeatWithStatus[]) => [...prev, { ...seat, isSelected: true }]);
       }
       
+      // Обновляем корзину
       const cartRes = await cartAPI.getCart();
       setCart(cartRes.data);
       
     } catch (error: unknown) {
       console.error('Error updating cart:', error);
-      const err = error as { response?: { data?: { error?: string } } };
-      alert(err.response?.data?.error || 'Произошла ошибка');
+      const err = error as { response?: { data?: { error?: string }, status?: number } };
+      if (err.response?.status === 401) {
+        alert('Сессия истекла. Пожалуйста, войдите заново.');
+        authAPI.clearTokens();
+        navigate('/login');
+      } else {
+        alert(err.response?.data?.error || 'Произошла ошибка');
+      }
     }
   };
 
