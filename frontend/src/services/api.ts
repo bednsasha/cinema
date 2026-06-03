@@ -33,7 +33,10 @@ getTodaySessions: () => {
     const today = new Date().toISOString().split('T')[0];
     return api.get<Session[]>(`/showtimes/sessions/?date=${today}`);
   },
+  getBookedSeats: (sessionId: number) => 
+    api.get<{ booked_seat_ids: number[] }>(`/showtimes/sessions/${sessionId}/booked-seats/`),
 };
+
 export const rentalAPI = {
   getAll: () => api.get<Rental[]>('/showtimes/rentals/'),
   getCurrent: () => {
@@ -43,5 +46,25 @@ export const rentalAPI = {
 };
 export const hallAPI = {
   getAll: () => api.get('/cinema/halls/'),
-  getSeats: (hallId: number) => api.get(`/cinema/halls/${hallId}/seats/`),
+  getById: (id: number) => api.get(`/cinema/halls/${id}/`),
+  getSeats: (hallId: number) => api.get<Seat[]>(`/cinema/halls/${hallId}/seats/`),
+};
+export const cartAPI = {
+  // Получить текущую корзину
+  getCart: () => api.get('/cart/'),
+  
+  // Добавить место в корзину
+  addToCart: (sessionId: number, seatId: number) => 
+    api.post('/cart/add/', { session_id: sessionId, seat_id: seatId }),
+  
+  // Удалить место из корзины
+  removeFromCart: (bookingId: number) => 
+    api.delete(`/cart/remove/${bookingId}/`),
+  
+  // Очистить корзину
+  clearCart: () => api.post('/cart/clear/'),
+  
+  // Применить скидку
+  applyDiscount: (isDiscount: boolean, discountPercent?: number) => 
+    api.post('/cart/apply-discount/', { is_discount: isDiscount, discount_percent: discountPercent }),
 };

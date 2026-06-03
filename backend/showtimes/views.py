@@ -7,7 +7,9 @@ from .serializers import (
 )
 from core.permissions import IsAdminOrReadOnly
 from django_filters import FilterSet, DateFilter 
-
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from cart.models import Booking
 class RentalViewSet(viewsets.ModelViewSet):
     queryset = Rental.objects.select_related('film').all()
     permission_classes = [IsAdminOrReadOnly]
@@ -44,3 +46,18 @@ class SessionViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return SessionSerializer
         return SessionDetailSerializer
+    @action(detail=True, methods=['get'], url_path='booked-seats')
+    def booked_seats(self, request, pk=None):
+        """Возвращает список занятых мест на этот сеанс"""
+        session = self.get_object()
+        # Получаем все бронирования на этот сеанс
+        bookings = Booking.objects.filter(session=session)
+        
+        # Собираем ID занятых мест
+        booked_seat_ids = list(bookings.values_list('seat_id', flat=True))
+        
+        return Response({
+            'session_id': session.id,
+            'booked_seat_ids': booked_seat_ids,
+            'total_booked': len(booked_seat_ids)
+        })
