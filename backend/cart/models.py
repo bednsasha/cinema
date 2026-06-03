@@ -16,7 +16,7 @@ class Cart(models.Model):
     expires_at = models.DateTimeField()
     total_items = models.IntegerField(default=0)
     total_price = models.DecimalField(max_digits=10, decimal_places=2, default=0)
-    send_to_email = models.EmailField()
+    send_to_email = models.EmailField(blank=True, null=True)
     discount_percent = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     is_discount = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')

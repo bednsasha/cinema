@@ -119,50 +119,58 @@ export default function BookingPage() {
   };
 
   const handleSeatClick = async (seat: SeatWithStatus) => {
-    // Проверяем авторизацию при клике
-    if (!authAPI.isAuthenticated()) {
-      localStorage.setItem('redirectAfterLogin', window.location.pathname);
-      alert('Для выбора мест необходимо войти в систему');
+  // Проверяем авторизацию при клике
+  if (!authAPI.isAuthenticated()) {
+    localStorage.setItem('redirectAfterLogin', window.location.pathname);
+    alert('Для выбора мест необходимо войти в систему');
+    navigate('/login');
+    return;
+  }
+  
+  if (seat.isBooked) return;
+  
+  // ЛОГИРУЕМ ДАННЫЕ
+  console.log('Adding to cart:', {
+    sessionId: Number(sessionId),
+    seatId: seat.id
+  });
+  
+  try {
+    if (seat.isSelected) {
+      if (seat.bookingId) {
+        await cartAPI.removeFromCart(seat.bookingId);
+      }
+      
+      setSeats((prev: SeatWithStatus[]) => prev.map((s: SeatWithStatus) => 
+        s.id === seat.id ? { ...s, isSelected: false, bookingId: undefined } : s
+      ));
+      
+    } else {
+      const response = await cartAPI.addToCart(Number(sessionId), seat.id);
+      console.log('Add to cart response:', response);
+      
+      setSeats((prev: SeatWithStatus[]) => prev.map((s: SeatWithStatus) => 
+        s.id === seat.id ? { ...s, isSelected: true, bookingId: response.data.booking_id } : s
+      ));
+    }
+    
+    // Обновляем корзину
+    const cartRes = await cartAPI.getCart();
+    setCart(cartRes.data);
+    
+  } catch (error: unknown) {
+    console.error('Error updating cart:', error);
+    const err = error as { response?: { data?: { error?: string }, status?: number } };
+    console.log('Error response data:', err.response?.data); // ← ВАЖНО: показать ошибку от бэкенда
+    if (err.response?.status === 401) {
+      alert('Сессия истекла. Пожалуйста, войдите заново.');
+      authAPI.clearTokens();
       navigate('/login');
-      return;
+    } else {
+      alert(err.response?.data?.error || 'Произошла ошибка');
     }
-    
-    if (seat.isBooked) return;
-    
-    try {
-      if (seat.isSelected) {
-        if (seat.bookingId) {
-          await cartAPI.removeFromCart(seat.bookingId);
-        }
-        
-        setSeats((prev: SeatWithStatus[]) => prev.map((s: SeatWithStatus) => 
-          s.id === seat.id ? { ...s, isSelected: false, bookingId: undefined } : s
-        ));
-        
-      } else {
-        const response = await cartAPI.addToCart(Number(sessionId), seat.id);
-        
-        setSeats((prev: SeatWithStatus[]) => prev.map((s: SeatWithStatus) => 
-          s.id === seat.id ? { ...s, isSelected: true, bookingId: response.data.booking_id } : s
-        ));
-      }
-      
-      // Обновляем корзину
-      const cartRes = await cartAPI.getCart();
-      setCart(cartRes.data);
-      
-    } catch (error: unknown) {
-      console.error('Error updating cart:', error);
-      const err = error as { response?: { data?: { error?: string }, status?: number } };
-      if (err.response?.status === 401) {
-        alert('Сессия истекла. Пожалуйста, войдите заново.');
-        authAPI.clearTokens();
-        navigate('/login');
-      } else {
-        alert(err.response?.data?.error || 'Произошла ошибка');
-      }
-    }
-  };
+  }
+};
 
   const getSeatColor = (seat: SeatWithStatus): string => {
     if (seat.isBooked) return 'bg-gray-600 cursor-not-allowed';

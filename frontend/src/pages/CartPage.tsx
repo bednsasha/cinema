@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { cartAPI, authAPI } from '../services/api';
 
+const API_URL = 'http://127.0.0.1:8000/api';
+
 interface SeatDetail {
   id: number;
   row_number: number;
@@ -47,6 +49,7 @@ export default function CartPage() {
   const [loading, setLoading] = useState(true);
   const [discountCode, setDiscountCode] = useState('');
   const [applyingDiscount, setApplyingDiscount] = useState(false);
+  const [creatingPayment, setCreatingPayment] = useState(false);
 
   useEffect(() => {
     // Проверяем авторизацию
@@ -74,7 +77,7 @@ export default function CartPage() {
   const handleRemoveItem = async (bookingId: number) => {
     try {
       await cartAPI.removeFromCart(bookingId);
-      await loadCart(); // Перезагружаем корзину
+      await loadCart();
     } catch (error) {
       console.error('Error removing item:', error);
       alert('Не удалось удалить место');
@@ -86,7 +89,7 @@ export default function CartPage() {
     
     setApplyingDiscount(true);
     try {
-      await cartAPI.applyDiscount(true, 10); // 10% скидка для теста
+      await cartAPI.applyDiscount(true, 10);
       await loadCart();
       setDiscountCode('');
     } catch (error) {
@@ -121,10 +124,38 @@ export default function CartPage() {
     }
   };
 
-  const handleCheckout = () => {
-    navigate('/payment');
-  };
+  const handleCheckout = async () => {
+  setCreatingPayment(true);
+  try {
+    const token = localStorage.getItem('access_token');
+    const response = await fetch(`${API_URL}/payment/create/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        success_url: `${window.location.origin}/payment/success`,
+        cancel_url: `${window.location.origin}/cart`
+      })
+    });
 
+    const data = await response.json();
+    
+    if (response.ok && data.payment_url) {
+      // Сохраняем payment_id в localStorage
+      localStorage.setItem('last_payment_id', data.payment_id);
+      window.location.href = data.payment_url;
+    } else {
+      alert(data.error || 'Ошибка создания платежа');
+    }
+  } catch (error) {
+    console.error('Payment error:', error);
+    alert('Ошибка при создании платежа');
+  } finally {
+    setCreatingPayment(false);
+  }
+};
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -281,9 +312,9 @@ export default function CartPage() {
                   <button
                     onClick={handleApplyDiscount}
                     disabled={applyingDiscount}
-                    className="px-4 py-2 bg-purple-600 rounded-lg font-semibold text-white hover:bg-purple-700 transition disabled:opacity-50"
+                    className="px-4 py-2 bg-purple-600 rounded-lg font-semibold text-white hover:bg-purple-700 transition disabled:opacity-50 whitespace-nowrap"
                   >
-                    Применить
+                    {applyingDiscount ? '...' : 'Применить'}
                   </button>
                 </div>
                 {cart.is_discount && (
@@ -313,9 +344,10 @@ export default function CartPage() {
               {/* Кнопка оплаты */}
               <button
                 onClick={handleCheckout}
-                className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold text-white hover:opacity-90 transition"
+                disabled={creatingPayment}
+                className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
               >
-                Перейти к оплате →
+                {creatingPayment ? 'Создание платежа...' : 'Перейти к оплате →'}
               </button>
               
               <p className="text-xs text-gray-500 text-center mt-4">

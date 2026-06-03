@@ -156,8 +156,17 @@ class ResendCodeSerializer(serializers.Serializer):
 
 # users/serializers.py - исправь последний класс
 
+# users/serializers.py - исправленный CustomTokenObtainPairSerializer
+
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'
+
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # Добавляем last_password_change в токен
+        token['last_password_change'] = user.last_password_change.timestamp()
+        return token
 
     def validate(self, attrs):
         email = attrs.get('email')
@@ -171,11 +180,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         if not check_password(password, user.password):
             raise serializers.ValidationError("Неверный email или пароль")
 
-        # Убираем проверку is_email_verified
-        # if not user.is_email_verified:
-        #     raise serializers.ValidationError("Подтвердите email перед входом")
-
-        refresh = RefreshToken.for_user(user)
+        refresh = self.get_token(user)
 
         return {
             'refresh': str(refresh),

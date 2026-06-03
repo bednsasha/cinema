@@ -24,6 +24,8 @@ class CartViewSet(viewsets.ModelViewSet):
             return CartDetailSerializer
         return CartSerializer
 
+    # cart/views.py - исправленный метод
+
     def get_or_create_active_cart(self):
         cart = Cart.objects.filter(
             customer=self.request.user,
@@ -34,7 +36,9 @@ class CartViewSet(viewsets.ModelViewSet):
             cart = Cart.objects.create(
                 customer=self.request.user,
                 expires_at=timezone.now() + timedelta(minutes=30),
-                send_to_email=self.request.user.email
+                send_to_email=self.request.user.email,  # Добавь это поле
+                total_items=0,
+                total_price=0
             )
         return cart
 
@@ -43,53 +47,86 @@ class CartViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(cart)
         return Response(serializer.data)
 
+    # cart/views.py - полностью переделанный add_to_cart
+
     @action(
         detail=False,
         methods=['post'],
-        url_path='add',
-        serializer_class=AddToCartSerializer
+        url_path='add'
     )
     def add_to_cart(self, request):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        session_id = serializer.validated_data['session_id']
-        seat_id = serializer.validated_data['seat_id']
-
-        from showtimes.models import Session
-        from cinema.models import Seat
-        from payments.models import Ticket
-
-        session = Session.objects.get(id=session_id)
-        seat = Seat.objects.get(id=seat_id)
-
+        print("=== ADD TO CART ===")
+        print("Request user:", request.user)
+        print("Request data:", request.data)
+        
+        session_id = request.data.get('session_id')
+        seat_id = request.data.get('seat_id')
+        
+        if not session_id or not seat_id:
+            return Response(
+                {"error": "session_id и seat_id обязательны"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        try:
+            from showtimes.models import Session
+            from cinema.models import Seat
+            
+            session = Session.objects.get(id=int(session_id))
+            seat = Seat.objects.get(id=int(seat_id))
+        except Session.DoesNotExist:
+            return Response(
+                {"error": "Сеанс не найден"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Seat.DoesNotExist:
+            return Response(
+                {"error": "Место не найдено"},
+                status=status.HTTP_404_NOT_FOUND
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
         # Проверка, что место принадлежит залу сеанса
         if seat.hall != session.hall:
             return Response(
                 {"error": f"Место {seat.seat_number} не принадлежит залу {session.hall.name}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
+        
         # Проверка, что место свободно
+        from .models import Booking
         if Booking.objects.filter(session=session, seat=seat).exists():
             return Response(
                 {"error": "Это место уже забронировано"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-
-        if Ticket.objects.filter(booking__session=session, booking__seat=seat).exists():
-            return Response(
-                {"error": "Это место уже продано"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        # Рассчитываем цену
-        price = calculate_ticket_price(session, seat.seat_type.name)
-
+        
+        # Проверка, что место не продано
+        try:
+            from payments.models import Ticket
+            if Ticket.objects.filter(booking__session=session, booking__seat=seat).exists():
+                return Response(
+                    {"error": "Это место уже продано"},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+        except ImportError:
+            pass  # Если модель Ticket еще не создана
+        
         # Получаем или создаём корзину
         cart = self.get_or_create_active_cart()
-
+        print("Cart created/found:", cart.id)
+        
+        # Рассчитываем цену (временно фиксированная)
+        price = 300
+        
         # Создаём бронь
+        from django.utils import timezone
+        from datetime import timedelta
+        
         booking = Booking.objects.create(
             cart=cart,
             session=session,
@@ -97,17 +134,17 @@ class CartViewSet(viewsets.ModelViewSet):
             price=price,
             expires_at=timezone.now() + timedelta(minutes=15)
         )
-
+        
         # Обновляем итоги корзины
+        from django.db import models
         cart.total_items = cart.bookings.count()
         cart.total_price = cart.bookings.aggregate(total=models.Sum('price'))['total'] or 0
         cart.save()
-
+        
         return Response(
             {"message": "Место добавлено в корзину", "booking_id": booking.id},
             status=status.HTTP_201_CREATED
         )
-
     @action(
         detail=False,
         methods=['delete'],
