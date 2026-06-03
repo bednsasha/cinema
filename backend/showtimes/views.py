@@ -6,7 +6,7 @@ from .serializers import (
     SessionSerializer, SessionDetailSerializer
 )
 from core.permissions import IsAdminOrReadOnly
-
+from django_filters import FilterSet, DateFilter 
 
 class RentalViewSet(viewsets.ModelViewSet):
     queryset = Rental.objects.select_related('film').all()
@@ -22,11 +22,21 @@ class RentalViewSet(viewsets.ModelViewSet):
         return RentalDetailSerializer
 
 
+class SessionFilter(FilterSet): 
+    date = DateFilter(field_name='start_time', lookup_expr='date')
+    date_gte = DateFilter(field_name='start_time', lookup_expr='date__gte')
+    date_lte = DateFilter(field_name='start_time', lookup_expr='date__lte')
+    
+    class Meta:
+        model = Session
+        fields = ['hall', 'rental', 'screen_type', 'rental__film', 'date', 'date_gte', 'date_lte']
+
+
 class SessionViewSet(viewsets.ModelViewSet):
     queryset = Session.objects.select_related('hall', 'rental__film', 'screen_type').all()
     permission_classes = [IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['hall', 'rental', 'screen_type']
+    filterset_class = SessionFilter  
     search_fields = ['rental__film__name', 'hall__name']
     ordering_fields = ['start_time', 'hall__name']
     
