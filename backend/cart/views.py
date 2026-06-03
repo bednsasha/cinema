@@ -134,7 +134,13 @@ class CartViewSet(viewsets.ModelViewSet):
             price=price,
             expires_at=timezone.now() + timedelta(minutes=15)
         )
-        
+        # ПРОВЕРКА: Сеанс не должен быть завершен
+        if session.is_past:
+            return Response(
+                {"error": "Нельзя купить билет на завершенный сеанс"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+    
         # Обновляем итоги корзины
         from django.db import models
         cart.total_items = cart.bookings.count()

@@ -50,6 +50,7 @@ export interface Session {
   screen_type: number;
   screen_type_name: string;
   start_time: string;
+  is_past?: boolean;
 }
 
 export interface SeatType {

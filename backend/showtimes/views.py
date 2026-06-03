@@ -34,6 +34,8 @@ class SessionFilter(FilterSet):
         fields = ['hall', 'rental', 'screen_type', 'rental__film', 'date', 'date_gte', 'date_lte']
 
 
+# showtimes/views.py - убери дублирование метода get_queryset
+
 class SessionViewSet(viewsets.ModelViewSet):
     queryset = Session.objects.select_related('hall', 'rental__film', 'screen_type').all()
     permission_classes = [IsAdminOrReadOnly]
@@ -46,16 +48,13 @@ class SessionViewSet(viewsets.ModelViewSet):
         if self.action == 'list':
             return SessionSerializer
         return SessionDetailSerializer
+    
     @action(detail=True, methods=['get'], url_path='booked-seats')
     def booked_seats(self, request, pk=None):
         """Возвращает список занятых мест на этот сеанс"""
         session = self.get_object()
-        # Получаем все бронирования на этот сеанс
         bookings = Booking.objects.filter(session=session)
-        
-        # Собираем ID занятых мест
         booked_seat_ids = list(bookings.values_list('seat_id', flat=True))
-        
         return Response({
             'session_id': session.id,
             'booked_seat_ids': booked_seat_ids,

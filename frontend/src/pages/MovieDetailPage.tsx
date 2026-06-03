@@ -1,3 +1,4 @@
+// src/pages/MovieDetailPage.tsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { movieAPI, sessionAPI } from '../services/api';
@@ -22,7 +23,7 @@ export default function MovieDetailPage() {
           
           // Фильтруем только будущие сеансы (сегодня и позже)
           const now = new Date();
-          now.setHours(0, 0, 0, 0); // Обнуляем время для сравнения дат
+          now.setHours(0, 0, 0, 0);
           
           const futureSessions = sessionsRes.data.filter(session => {
             const sessionDate = new Date(session.start_time);
@@ -39,13 +40,12 @@ export default function MovieDetailPage() {
     }
   }, [id]);
 
-  // Группируем сеансы по датам (только будущие)
+  // Группируем сеансы по датам
   const groupedSessions = sessions.reduce((acc, session) => {
     const sessionDate = new Date(session.start_time);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
     
-    // Определяем формат даты в зависимости от того, сегодня это или нет
     let dateKey;
     if (sessionDate.toDateString() === today.toDateString()) {
       dateKey = 'Сегодня';
@@ -64,7 +64,6 @@ export default function MovieDetailPage() {
 
   const dates = Object.keys(groupedSessions);
 
-  // Сортируем даты по возрастанию
   const sortedDates = [...dates].sort((a, b) => {
     if (a === 'Сегодня') return -1;
     if (b === 'Сегодня') return 1;
@@ -74,14 +73,12 @@ export default function MovieDetailPage() {
     return dateA.getTime() - dateB.getTime();
   });
 
-  // Сортируем сеансы по времени для каждой даты
   Object.keys(groupedSessions).forEach(date => {
     groupedSessions[date].sort((a, b) => 
       new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
     );
   });
 
-  // Этот useEffect должен быть до любого return
   useEffect(() => {
     if (sortedDates.length > 0 && !selectedDate) {
       setSelectedDate(sortedDates[0]);
@@ -90,7 +87,6 @@ export default function MovieDetailPage() {
 
   const filteredSessions = selectedDate ? groupedSessions[selectedDate] || [] : [];
 
-  // Только после всех хуков можно делать условный рендер
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -109,7 +105,7 @@ export default function MovieDetailPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Hero секция с постером */}
+      {/* Hero секция */}
       <div className="relative h-[500px] bg-cover bg-center" style={{
         backgroundImage: movie.poster ? `url(${movie.poster})` : 'none',
         backgroundColor: '#1a1a2e'
@@ -118,7 +114,6 @@ export default function MovieDetailPage() {
         
         <div className="relative container mx-auto px-6 h-full flex items-end pb-12">
           <div className="flex flex-col md:flex-row gap-8 items-start">
-            {/* Постер */}
             <div className="w-48 md:w-64 rounded-xl overflow-hidden shadow-2xl">
               {movie.poster ? (
                 <img 
@@ -133,7 +128,6 @@ export default function MovieDetailPage() {
               )}
             </div>
             
-            {/* Информация о фильме */}
             <div className="flex-1">
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{movie.name}</h1>
               
@@ -171,10 +165,8 @@ export default function MovieDetailPage() {
         </div>
       </div>
 
-      {/* Контент */}
       <div className="container mx-auto px-6 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          {/* Левая колонка - описание */}
           <div className="lg:col-span-2">
             <h2 className="text-2xl font-bold text-white mb-4">О фильме</h2>
             <p className="text-gray-300 leading-relaxed whitespace-pre-line">
@@ -196,7 +188,6 @@ export default function MovieDetailPage() {
             )}
           </div>
 
-          {/* Правая колонка - сеансы */}
           <div>
             <div className="bg-gray-800 rounded-xl p-6 sticky top-24">
               <h3 className="text-2xl font-bold text-white mb-4">Ближайшие сеансы</h3>
@@ -208,7 +199,6 @@ export default function MovieDetailPage() {
                 </div>
               ) : (
                 <>
-                  {/* Выбор даты */}
                   <div className="flex flex-wrap gap-2 mb-6">
                     {sortedDates.map((date) => (
                       <button
@@ -225,37 +215,52 @@ export default function MovieDetailPage() {
                     ))}
                   </div>
 
-                  {/* Сеансы на выбранную дату */}
                   <div className="space-y-3">
-                    {filteredSessions.map((session) => (
-                      <button
-                        key={session.id}
-                        onClick={() => navigate(`/booking/${session.id}`)}
-                        className="w-full p-4 bg-gray-700 rounded-lg text-left hover:bg-gray-600 transition-colors group"
-                      >
-                        <div className="flex justify-between items-center">
-                          <div>
-                            <p className="text-xl font-bold text-white">
-                              {new Date(session.start_time).toLocaleTimeString('ru-RU', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
-                            </p>
-                            <p className="text-sm text-gray-400 mt-1">
-                              Зал: {session.hall_name}
-                            </p>
-                            <p className="text-xs text-gray-500 mt-0.5">
-                              {session.screen_type_name}
-                            </p>
-                          </div>
-                          <div className="text-right">
-                            <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center group-hover:bg-red-500/30 transition">
-                              <span className="text-red-400 text-xl">→</span>
+                    {filteredSessions.map((session) => {
+                      // Проверяем, завершен ли сеанс
+                      const sessionDate = new Date(session.start_time);
+                      const now = new Date();
+                      const isPast = sessionDate < now;
+                      
+                      return (
+                        <button
+                          key={session.id}
+                          onClick={() => !isPast && navigate(`/booking/${session.id}`)}
+                          disabled={isPast}
+                          className={`w-full p-4 rounded-lg text-left transition-colors ${
+                            isPast 
+                              ? 'bg-gray-800 opacity-50 cursor-not-allowed' 
+                              : 'bg-gray-700 hover:bg-gray-600 group'
+                          }`}
+                        >
+                          <div className="flex justify-between items-center">
+                            <div>
+                              <p className={`text-xl font-bold ${isPast ? 'text-gray-500' : 'text-white'}`}>
+                                {new Date(session.start_time).toLocaleTimeString('ru-RU', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </p>
+                              <p className="text-sm text-gray-400 mt-1">
+                                Зал: {session.hall_name}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-0.5">
+                                {session.screen_type_name}
+                              </p>
+                            </div>
+                            <div className="text-right">
+                              {isPast ? (
+                                <span className="text-sm text-gray-500">Завершен</span>
+                              ) : (
+                                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center group-hover:bg-red-500/30 transition">
+                                  <span className="text-red-400 text-xl">→</span>
+                                </div>
+                              )}
                             </div>
                           </div>
-                        </div>
-                      </button>
-                    ))}
+                        </button>
+                      );
+                    })}
                   </div>
                 </>
               )}

@@ -39,6 +39,7 @@ class Payment(models.Model):
     def mark_as_success(self):
         """Отметить платеж как успешный и создать билеты"""
         self.payment_status = 'success'
+        self.yookassa_status = 'succeeded'
         self.paid_at = timezone.now()
         self.save()
 
@@ -92,11 +93,25 @@ class Ticket(models.Model):
         return f'Билет #{self.id} - {self.booking.seat}'
 
     def generate_qr_code(self):
-        """Генерация QR-кода для билета"""
-        import hashlib
-        import uuid
-
-        unique_string = f"{self.id}_{self.booking.session.id}_{self.booking.seat.id}_{self.payment.id}"
-        self.qr_code = hashlib.md5(unique_string.encode()).hexdigest()
+        # Ваша логика генерации QR-кода
+        import qrcode
+        from io import BytesIO
+        from django.core.files import File
+        
+        # Создаем данные для QR-кода
+        qr_data = f"Ticket ID: {self.id}\nBooking ID: {self.booking.id}\nSeat: {self.booking.seat.seat_number}\nSession: {self.booking.session.id}"
+        
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(qr_data)
+        qr.make(fit=True)
+        
+        img = qr.make_image(fill_color="black", back_color="white")
+        
+        # Сохраняем в поле ImageField
+        buffer = BytesIO()
+        img.save(buffer, 'PNG')
+        buffer.seek(0)
+        
+        filename = f"ticket_{self.id}_{self.booking.id}.png"
+        self.qr_code.save(filename, File(buffer), save=False)
         self.save()
-        return self.qr_code

@@ -10,7 +10,6 @@ export default function SchedulePage() {
   const [loading, setLoading] = useState(true);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  // Получаем даты для календаря (неделя)
   const getWeekDates = (): Date[] => {
     const dates: Date[] = [];
     const startOfWeek = new Date(selectedDate);
@@ -29,12 +28,10 @@ export default function SchedulePage() {
   const weekDates = getWeekDates();
   const today = new Date().toISOString().split('T')[0];
 
-  // Загружаем фильмы
   useEffect(() => {
     movieAPI.getAll().then(res => setMovies(res.data)).catch(console.error);
   }, []);
 
-  // Загружаем сеансы при выборе даты
   useEffect(() => {
     setLoading(true);
     const dateStr = selectedDate.toISOString().split('T')[0];
@@ -50,7 +47,6 @@ export default function SchedulePage() {
       });
   }, [selectedDate]);
 
-  // Группируем сеансы по фильмам
   const groupedSessions = sessions.reduce((acc, session) => {
     const film = movies.find(m => m.name === session.film_name);
     if (!acc[session.film_name]) {
@@ -63,7 +59,6 @@ export default function SchedulePage() {
     return acc;
   }, {} as Record<string, { film: Movie | undefined; sessions: Session[] }>);
 
-  // Сортируем сеансы по времени
   Object.values(groupedSessions).forEach(group => {
     group.sessions.sort((a, b) => 
       new Date(a.start_time).getTime() - new Date(b.start_time).getTime()
@@ -79,13 +74,11 @@ export default function SchedulePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12">
       <div className="container mx-auto px-6">
-        {/* Заголовок */}
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-white mb-2">Расписание сеансов</h1>
           <div className="w-24 h-1 bg-gradient-to-r from-red-500 to-purple-600 mx-auto rounded-full"></div>
         </div>
 
-        {/* Навигация по неделям */}
         <div className="flex justify-between items-center mb-8">
           <button
             onClick={() => {
@@ -115,7 +108,6 @@ export default function SchedulePage() {
           </button>
         </div>
 
-        {/* Календарь - выбор даты */}
         <div className="grid grid-cols-7 gap-4 mb-8">
           {weekDates.map((date, index) => {
             const dateStr = date.toISOString().split('T')[0];
@@ -145,12 +137,10 @@ export default function SchedulePage() {
           })}
         </div>
 
-        {/* Выбранная дата */}
         <div className="mb-6">
           <h2 className="text-2xl font-bold text-white">{formattedDate}</h2>
         </div>
 
-        {/* Сеансы на выбранную дату */}
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-500"></div>
@@ -190,26 +180,45 @@ export default function SchedulePage() {
                 </div>
                 
                 <div className="flex flex-wrap gap-3 ml-0 md:ml-24">
-                  {filmSessions.map((session) => (
-                    <Link
-                      key={session.id}
-                      to={`/booking/${session.id}`}
-                      className="px-4 py-3 bg-gray-700 rounded-lg hover:bg-red-600 transition text-center min-w-[110px]"
-                    >
-                      <div className="text-lg font-bold">
-                        {new Date(session.start_time).toLocaleTimeString('ru-RU', {
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })}
-                      </div>
-                      <div className="text-xs text-gray-400 mt-1">
-                        {session.hall_name}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {session.screen_type_name}
-                      </div>
-                    </Link>
-                  ))}
+                  {filmSessions.map((session) => {
+                    const sessionDate = new Date(session.start_time);
+                    const now = new Date();
+                    const isPast = sessionDate < now;
+                    
+                    return (
+                      <Link
+                        key={session.id}
+                        to={!isPast ? `/booking/${session.id}` : '#'}
+                        onClick={(e) => {
+                          if (isPast) {
+                            e.preventDefault();
+                            alert('Этот сеанс уже завершен');
+                          }
+                        }}
+                        className={`px-4 py-3 rounded-lg text-center min-w-[110px] transition ${
+                          isPast
+                            ? 'bg-gray-800 opacity-50 cursor-not-allowed'
+                            : 'bg-gray-700 hover:bg-red-600'
+                        }`}
+                      >
+                        <div className={`text-lg font-bold ${isPast ? 'text-gray-500' : 'text-white'}`}>
+                          {new Date(session.start_time).toLocaleTimeString('ru-RU', {
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })}
+                        </div>
+                        <div className={`text-xs mt-1 ${isPast ? 'text-gray-600' : 'text-gray-400'}`}>
+                          {session.hall_name}
+                        </div>
+                        <div className={`text-xs ${isPast ? 'text-gray-600' : 'text-gray-500'}`}>
+                          {session.screen_type_name}
+                        </div>
+                        {isPast && (
+                          <div className="text-xs text-gray-500 mt-1">Завершен</div>
+                        )}
+                      </Link>
+                    );
+                  })}
                 </div>
               </div>
             ))}
