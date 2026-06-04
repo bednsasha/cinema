@@ -31,13 +31,11 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
       : `http://127.0.0.1:8000${movie.poster}`
     : 'https://via.placeholder.com/300x400/1a1a1a/ffffff?text=No+Poster';
 
-  // Получаем жанры (могут быть массивом объектов или массивом строк)
   const genresList = movie.genres || [];
   const displayGenres = genresList.slice(0, 3).map((genre: any, idx: number) => 
     typeof genre === 'string' ? genre : genre.name
   );
 
-  // Описание фильма
   const description = movie.description || 'Описание отсутствует';
 
   return (
