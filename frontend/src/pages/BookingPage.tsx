@@ -157,6 +157,9 @@ export default function BookingPage() {
     // Обновляем корзину
     const cartRes = await cartAPI.getCart();
     setCart(cartRes.data);
+
+    // Вызываем событие обновления корзины для Navbar
+    window.dispatchEvent(new Event('cartUpdated'));
     
   } catch (error: unknown) {
     console.error('Error updating cart:', error);

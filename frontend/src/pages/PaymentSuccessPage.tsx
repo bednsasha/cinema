@@ -62,6 +62,8 @@ export default function PaymentSuccessPage() {
         
         if (data.payment_status === 'success') {
           localStorage.removeItem('last_payment_id');
+          // Обновляем счетчик корзины
+          window.dispatchEvent(new Event('cartUpdated'));
           await loadTickets();
         } else if (data.payment_status === 'pending' && checkCount.current < maxChecks) {
           checkCount.current++;
@@ -95,7 +97,6 @@ export default function PaymentSuccessPage() {
       const data = await response.json();
       console.log('Loaded all tickets:', data);
       
-      // Фильтруем только активные билеты (которые не просрочены и статус active)
       const now = new Date();
       const activeTickets = data.filter((ticket: Ticket) => {
         const sessionDate = new Date(ticket.session_time);
@@ -104,6 +105,9 @@ export default function PaymentSuccessPage() {
       
       setAllTickets(activeTickets);
       setLoading(false);
+      
+      // Обновляем счетчик корзины
+      window.dispatchEvent(new Event('cartUpdated'));
       
       if (activeTickets.length === 0) {
         setError('Активные билеты не найдены. Возможно, платеж обрабатывается.');
@@ -115,7 +119,6 @@ export default function PaymentSuccessPage() {
     }
   };
 
-  // Формируем данные для QR-кода
   const getQRData = (ticket: Ticket) => {
     return JSON.stringify({
       ticket_id: ticket.id,
@@ -166,9 +169,7 @@ export default function PaymentSuccessPage() {
           <div className="bg-yellow-900/30 border border-yellow-500 rounded-xl p-8 text-center">
             <div className="text-6xl mb-4">🎫</div>
             <h1 className="text-3xl font-bold text-white mb-2">Нет активных билетов</h1>
-            <p className="text-gray-300 mb-6">
-              У вас нет активных билетов на данный момент.
-            </p>
+            <p className="text-gray-300 mb-6">У вас нет активных билетов на данный момент.</p>
             <button
               onClick={() => navigate('/')}
               className="px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white"

@@ -1,4 +1,3 @@
-// src/components/Navbar.tsx
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -13,6 +12,21 @@ const Navbar: React.FC = () => {
   const [cartItemsCount, setCartItemsCount] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Функция загрузки количества товаров в корзине
+  const loadCartCount = async () => {
+    if (!authAPI.isAuthenticated()) {
+      setCartItemsCount(0);
+      return;
+    }
+    try {
+      const response = await cartAPI.getCart();
+      setCartItemsCount(response.data.total_items || 0);
+    } catch (error) {
+      console.error('Error loading cart count:', error);
+      setCartItemsCount(0);
+    }
+  };
+
   useEffect(() => {
     gsap.fromTo(navRef.current,
       { y: -100 },
@@ -20,26 +34,30 @@ const Navbar: React.FC = () => {
     );
     
     const checkAuth = () => {
-      setIsAuthenticated(authAPI.isAuthenticated());
+      const isAuth = authAPI.isAuthenticated();
+      setIsAuthenticated(isAuth);
+      if (isAuth) {
+        loadCartCount();
+      } else {
+        setCartItemsCount(0);
+      }
     };
     
     checkAuth();
     
+    // Слушаем событие обновления корзины
+    window.addEventListener('cartUpdated', loadCartCount);
     window.addEventListener('storage', checkAuth);
-    return () => window.removeEventListener('storage', checkAuth);
+    
+    return () => {
+      window.removeEventListener('storage', checkAuth);
+      window.removeEventListener('cartUpdated', loadCartCount);
+    };
   }, []);
 
-  // Загружаем количество товаров в корзине
+  // Загружаем количество при изменении авторизации
   useEffect(() => {
     if (isAuthenticated) {
-      const loadCartCount = async () => {
-        try {
-          const response = await cartAPI.getCart();
-          setCartItemsCount(response.data.total_items || 0);
-        } catch (error) {
-          console.error('Error loading cart count:', error);
-        }
-      };
       loadCartCount();
     } else {
       setCartItemsCount(0);

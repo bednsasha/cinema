@@ -47,8 +47,6 @@ export default function CartPage() {
   const navigate = useNavigate();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
-  const [discountCode, setDiscountCode] = useState('');
-  const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [creatingPayment, setCreatingPayment] = useState(false);
 
   useEffect(() => {
@@ -78,37 +76,11 @@ export default function CartPage() {
     try {
       await cartAPI.removeFromCart(bookingId);
       await loadCart();
+      // Обновляем счетчик в навбаре
+      window.dispatchEvent(new Event('cartUpdated'));
     } catch (error) {
       console.error('Error removing item:', error);
       alert('Не удалось удалить место');
-    }
-  };
-
-  const handleApplyDiscount = async () => {
-    if (!discountCode) return;
-    
-    setApplyingDiscount(true);
-    try {
-      await cartAPI.applyDiscount(true, 10);
-      await loadCart();
-      setDiscountCode('');
-    } catch (error) {
-      console.error('Error applying discount:', error);
-      alert('Не удалось применить скидку');
-    } finally {
-      setApplyingDiscount(false);
-    }
-  };
-
-  const handleRemoveDiscount = async () => {
-    setApplyingDiscount(true);
-    try {
-      await cartAPI.applyDiscount(false);
-      await loadCart();
-    } catch (error) {
-      console.error('Error removing discount:', error);
-    } finally {
-      setApplyingDiscount(false);
     }
   };
 
@@ -117,6 +89,8 @@ export default function CartPage() {
       try {
         await cartAPI.clearCart();
         await loadCart();
+        // Обновляем счетчик в навбаре
+        window.dispatchEvent(new Event('cartUpdated'));
       } catch (error) {
         console.error('Error clearing cart:', error);
         alert('Не удалось очистить корзину');
@@ -125,37 +99,37 @@ export default function CartPage() {
   };
 
   const handleCheckout = async () => {
-  setCreatingPayment(true);
-  try {
-    const token = localStorage.getItem('access_token');
-    const response = await fetch(`${API_URL}/payment/create/`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        success_url: `${window.location.origin}/payment/success`,
-        cancel_url: `${window.location.origin}/cart`
-      })
-    });
+    setCreatingPayment(true);
+    try {
+      const token = localStorage.getItem('access_token');
+      const response = await fetch(`${API_URL}/payment/create/`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          success_url: `${window.location.origin}/payment/success`,
+          cancel_url: `${window.location.origin}/cart`
+        })
+      });
 
-    const data = await response.json();
-    
-    if (response.ok && data.payment_url) {
-      // Сохраняем payment_id в localStorage
-      localStorage.setItem('last_payment_id', data.payment_id);
-      window.location.href = data.payment_url;
-    } else {
-      alert(data.error || 'Ошибка создания платежа');
+      const data = await response.json();
+      
+      if (response.ok && data.payment_url) {
+        localStorage.setItem('last_payment_id', data.payment_id);
+        window.location.href = data.payment_url;
+      } else {
+        alert(data.error || 'Ошибка создания платежа');
+      }
+    } catch (error) {
+      console.error('Payment error:', error);
+      alert('Ошибка при создании платежа');
+    } finally {
+      setCreatingPayment(false);
     }
-  } catch (error) {
-    console.error('Payment error:', error);
-    alert('Ошибка при создании платежа');
-  } finally {
-    setCreatingPayment(false);
-  }
-};
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
@@ -201,8 +175,7 @@ export default function CartPage() {
   }, {} as Record<string, any>);
 
   const subtotal = cart.total_price;
-  const discountAmount = cart.is_discount ? (subtotal * cart.discount_percent / 100) : 0;
-  const total = subtotal - discountAmount;
+  const total = subtotal;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12">
@@ -281,50 +254,12 @@ export default function CartPage() {
                   <span className="text-white">{subtotal} ₽</span>
                 </div>
                 
-                {cart.is_discount && (
-                  <div className="flex justify-between text-green-400">
-                    <span>Скидка {cart.discount_percent}%:</span>
-                    <span>- {Math.round(discountAmount)} ₽</span>
-                  </div>
-                )}
-                
                 <div className="border-t border-gray-700 pt-3">
                   <div className="flex justify-between text-xl font-bold">
                     <span className="text-white">Итого:</span>
                     <span className="text-blue-500">{Math.round(total)} ₽</span>
                   </div>
                 </div>
-              </div>
-              
-              {/* Промокод */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-300 mb-2">
-                  Промокод
-                </label>
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={discountCode}
-                    onChange={(e) => setDiscountCode(e.target.value)}
-                    placeholder="Введите код"
-                    className="flex-1 px-3 py-2 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
-                  />
-                  <button
-                    onClick={handleApplyDiscount}
-                    disabled={applyingDiscount}
-                    className="px-4 py-2 bg-purple-600 rounded-lg font-semibold text-white hover:bg-purple-700 transition disabled:opacity-50 whitespace-nowrap"
-                  >
-                    {applyingDiscount ? '...' : 'Применить'}
-                  </button>
-                </div>
-                {cart.is_discount && (
-                  <button
-                    onClick={handleRemoveDiscount}
-                    className="text-sm text-blue-400 mt-2 hover:text-blue-300"
-                  >
-                    Удалить скидку
-                  </button>
-                )}
               </div>
               
               {/* Информация о рассылке */}
