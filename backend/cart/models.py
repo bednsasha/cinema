@@ -21,7 +21,6 @@ class Cart(models.Model):
     is_discount = models.BooleanField(default=False)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
     def get_items(self):
-        """Получить все элементы корзины (бронирования)"""
         return self.bookings.all()
     
     @property

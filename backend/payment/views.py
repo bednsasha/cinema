@@ -16,7 +16,7 @@ from .serializers import PaymentSerializer, PaymentCreateSerializer, TicketSeria
 from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 
-# Настройка YooKassa (добавьте ваши ключи в settings.py)
+
 Configuration.account_id = getattr(settings, 'YOOKASSA_SHOP_ID', '')
 Configuration.secret_key = getattr(settings, 'YOOKASSA_SECRET_KEY', '')
 
@@ -29,7 +29,6 @@ class CreatePaymentView(generics.GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        # Получаем активную корзину пользователя
         cart = Cart.objects.filter(
             customer=request.user,
             status='active'
@@ -41,11 +40,10 @@ class CreatePaymentView(generics.GenericAPIView):
                 status=status.HTTP_400_BAD_REQUEST
             )
 
-        # Проверяем существующий платеж
         payment = Payment.objects.filter(cart=cart).first()
-        
+
         if payment and payment.payment_status == 'pending':
-            # Если платеж еще в ожидании, возвращаем его
+
             return Response({
                 "payment_id": payment.id,
                 "payment_url": payment.yookassa_payment_url or "https://yoomoney.ru",
@@ -53,17 +51,16 @@ class CreatePaymentView(generics.GenericAPIView):
                 "payment_status": payment.payment_status
             }, status=status.HTTP_200_OK)
         elif payment and payment.payment_status == 'success':
-            # Если платеж уже успешен
+
             return Response({
                 "payment_id": payment.id,
                 "payment_status": "success",
                 "message": "Корзина уже оплачена"
             }, status=status.HTTP_200_OK)
 
-        # Создаем новый платеж через Yookassa API
         try:
             idempotence_key = str(uuid.uuid4())
-            
+
             payment_data = {
                 "amount": {
                     "value": str(cart.total_price),
@@ -83,7 +80,6 @@ class CreatePaymentView(generics.GenericAPIView):
 
             yoo_payment = YooPayment.create(payment_data, idempotence_key)
 
-            # Сохраняем платеж в БД
             payment = Payment.objects.create(
                 cart=cart,
                 payment_status='pending',
@@ -92,7 +88,8 @@ class CreatePaymentView(generics.GenericAPIView):
                 amount=cart.total_price
             )
 
-            print(f"Payment created: {payment.id}, Yookassa ID: {yoo_payment.id}")
+            print(
+                f"Payment created: {payment.id}, Yookassa ID: {yoo_payment.id}")
 
             return Response({
                 "payment_id": payment.id,
@@ -107,7 +104,7 @@ class CreatePaymentView(generics.GenericAPIView):
                 {"error": f"Ошибка создания платежа: {str(e)}"},
                 status=status.HTTP_500_INTERNAL_SERVER_ERROR
             )
-            
+
 
 @method_decorator(csrf_exempt, name='dispatch')
 class YooKassaWebhookView(generics.GenericAPIView):
@@ -122,7 +119,6 @@ class YooKassaWebhookView(generics.GenericAPIView):
             print("Invalid JSON in webhook")
             return Response({"status": "error"}, status=400)
 
-        # Проверяем объект
         if 'object' not in event or 'id' not in event['object']:
             print("Missing object or id in webhook event")
             return Response({"status": "ok"})
@@ -130,9 +126,9 @@ class YooKassaWebhookView(generics.GenericAPIView):
         yoo_payment_id = event['object']['id']
         payment_status = event['object'].get('status')
 
-        print(f"Webhook received - Payment ID: {yoo_payment_id}, Status: {payment_status}")
+        print(
+            f"Webhook received - Payment ID: {yoo_payment_id}, Status: {payment_status}")
 
-        # Находим платёж в БД
         try:
             payment = Payment.objects.get(yookassa_payment_id=yoo_payment_id)
             print(f"Found payment {payment.id} in database")
@@ -140,20 +136,16 @@ class YooKassaWebhookView(generics.GenericAPIView):
             print(f"Payment not found for Yookassa ID: {yoo_payment_id}")
             return Response({"status": "ok"})
 
-        # Обновляем статус платежа
         if payment_status == 'succeeded':
             print(f"Processing successful payment {payment.id}")
-            
-            # Обновляем статус
+
             payment.payment_status = 'success'
             payment.save()
-            
-            # Обновляем статус корзины
+
             if payment.cart:
                 payment.cart.status = 'paid'
                 payment.cart.save()
-            
-            # Создаем билеты из бронирований
+
             bookings = payment.cart.bookings.all()
             for booking in bookings:
                 ticket, created = Ticket.objects.get_or_create(
@@ -163,7 +155,8 @@ class YooKassaWebhookView(generics.GenericAPIView):
                 )
                 if created:
                     ticket.generate_qr_code()
-                    print(f"Created ticket {ticket.id} for booking {booking.id}")
+                    print(
+                        f"Created ticket {ticket.id} for booking {booking.id}")
                 else:
                     print(f"Ticket already exists for booking {booking.id}")
 
@@ -179,7 +172,7 @@ class YooKassaWebhookView(generics.GenericAPIView):
 
 
 class PaymentStatusView(generics.GenericAPIView):
-    """View для получения статуса платежа"""
+
     permission_classes = [IsAuthenticated]
 
     def get(self, request, payment_id):
@@ -188,103 +181,97 @@ class PaymentStatusView(generics.GenericAPIView):
         serializer = PaymentSerializer(payment)
         return Response(serializer.data)
 
-# payment/views.py - полностью исправленный CheckPaymentStatusView
 
 class CheckPaymentStatusView(generics.GenericAPIView):
-    """View для проверки и обновления статуса платежа через YooKassa"""
+
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request, payment_id):
         payment = get_object_or_404(
             Payment, id=payment_id, cart__customer=request.user)
-        
+
         print(f"=== Checking payment {payment.id} ===")
         print(f"Payment status: {payment.payment_status}")
         print(f"Cart ID: {payment.cart.id}")
         print(f"Bookings in cart: {payment.cart.bookings.count()}")
-        
-        # Если платеж уже успешен
+
         if payment.payment_status == 'success':
-            # Проверяем, созданы ли билеты
+
             if payment.tickets.count() == 0:
-                print(f"Creating tickets for existing successful payment {payment.id}")
+                print(
+                    f"Creating tickets for existing successful payment {payment.id}")
                 self._create_tickets_from_bookings(payment)
-            
+
             return Response({
                 "payment_status": "success",
                 "payment_id": payment.id,
                 "tickets_count": payment.tickets.count()
             })
-        
-        # Проверяем есть ли yookassa_payment_id
+
         if not payment.yookassa_payment_id:
             return Response({
                 "payment_status": payment.payment_status,
                 "payment_id": payment.id,
                 "error": "No YooKassa payment ID"
             })
-        
-        # Запрашиваем статус у YooKassa
+
         try:
             import requests
             import base64
             from django.conf import settings
             from django.utils import timezone
-            
-            # Подготовка авторизации
+
             auth_string = f"{settings.YOOKASSA_SHOP_ID}:{settings.YOOKASSA_SECRET_KEY}"
             encoded_auth = base64.b64encode(auth_string.encode()).decode()
-            
+
             headers = {
                 'Authorization': f'Basic {encoded_auth}',
                 'Content-Type': 'application/json',
             }
-            
-            # Получаем статус платежа
+
             get_url = f"https://api.yookassa.ru/v3/payments/{payment.yookassa_payment_id}"
             response = requests.get(get_url, headers=headers)
-            
+
             if response.status_code == 200:
                 yoo_data = response.json()
                 status = yoo_data.get('status')
                 paid = yoo_data.get('paid', False)
-                
+
                 print(f"Yookassa status: {status}, paid: {paid}")
-                
-                # Если платеж ожидает подтверждения
+
                 if status == 'waiting_for_capture':
-                    print(f"Payment {payment.id} is waiting for capture, confirming...")
-                    
+                    print(
+                        f"Payment {payment.id} is waiting for capture, confirming...")
+
                     capture_url = f"https://api.yookassa.ru/v3/payments/{payment.yookassa_payment_id}/capture"
-                    capture_response = requests.post(capture_url, headers=headers, json={})
-                    
+                    capture_response = requests.post(
+                        capture_url, headers=headers, json={})
+
                     if capture_response.status_code == 200:
                         capture_data = capture_response.json()
                         status = capture_data.get('status')
                         paid = capture_data.get('paid', False)
                         print(f"Payment captured. New status: {status}")
                     else:
-                        print(f"Error capturing payment: {capture_response.text}")
-                
-                # Обрабатываем успешный платеж
+                        print(
+                            f"Error capturing payment: {capture_response.text}")
+
                 if status == 'succeeded' or paid:
                     print(f"Payment {payment.id} succeeded, processing...")
-                    
-                    # Обновляем статус платежа
+
                     payment.payment_status = 'success'
                     payment.save()
-                    
-                    # Обновляем статус корзины
+
                     if payment.cart:
                         payment.cart.status = 'paid'  # Меняем на 'paid'
                         payment.cart.save()
-                        print(f"Cart {payment.cart.id} status updated to 'paid'")
-                    
-                    # Создаем билеты из бронирований
+                        print(
+                            f"Cart {payment.cart.id} status updated to 'paid'")
+
                     self._create_tickets_from_bookings(payment)
-                    
+
                     print(f"Payment {payment.id} processed successfully")
-                    
+
                 elif status == 'canceled':
                     print(f"Payment {payment.id} was canceled")
                     payment.payment_status = 'failed'
@@ -293,14 +280,14 @@ class CheckPaymentStatusView(generics.GenericAPIView):
                         payment.cart.status = 'cancelled'
                         payment.cart.save()
             else:
-                print(f"Error getting payment: {response.status_code} - {response.text}")
-                
+                print(
+                    f"Error getting payment: {response.status_code} - {response.text}")
+
         except Exception as e:
             print(f"Error checking YooKassa payment {payment.id}: {e}")
             import traceback
             traceback.print_exc()
-        
-        # Возвращаем актуальный статус
+
         return Response({
             "payment_id": payment.id,
             "payment_status": payment.payment_status,
@@ -308,20 +295,18 @@ class CheckPaymentStatusView(generics.GenericAPIView):
             "tickets_count": payment.tickets.count(),
             "bookings_count": payment.cart.bookings.count()
         })
-    
-    # payment/views.py - добавь проверку наличия метода
 
     def _create_tickets_from_bookings(self, payment):
-        """Создание билетов из броней корзины"""
+
         from .models import Ticket
         import hashlib
-        
-        print(f"=== Creating tickets from bookings for payment {payment.id} ===")
-        
+
+        print(
+            f"=== Creating tickets from bookings for payment {payment.id} ===")
+
         for booking in payment.cart.bookings.all():
             print(f"  Processing booking {booking.id}, price={booking.price}")
-            
-            # Создаем билет
+
             ticket = Ticket.objects.create(
                 booking=booking,
                 payment=payment,
@@ -329,18 +314,18 @@ class CheckPaymentStatusView(generics.GenericAPIView):
                 status='active'
             )
             print(f"  Created ticket {ticket.id} with price {ticket.price}")
-            
-            # Генерируем QR-код
+
             unique_string = f"{ticket.id}_{booking.session.id}_{booking.seat.id}_{payment.id}_{booking.price}"
             ticket.qr_code = hashlib.md5(unique_string.encode()).hexdigest()
             ticket.save()
             print(f"  QR code generated: {ticket.qr_code[:16]}...")
-            
+
+
 class MyTicketsView(generics.GenericAPIView):
-    """View для получения билетов пользователя"""
+
     permission_classes = [IsAuthenticated]
     serializer_class = TicketSerializer
-    
+
     def get(self, request):
         tickets = Ticket.objects.filter(
             payment__cart__customer=request.user,
@@ -355,21 +340,21 @@ class MyTicketsView(generics.GenericAPIView):
 
 
 class TestPaymentView(generics.GenericAPIView):
-    """Тестовый эндпоинт для отладки платежей"""
+
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
-        cart = Cart.objects.filter(customer=request.user, status='active').first()
+        cart = Cart.objects.filter(
+            customer=request.user, status='active').first()
         if not cart:
             return Response({"error": "No active cart"}, status=400)
-        
-        # Создаем тестовый платеж
+
         payment = Payment.objects.create(
             cart=cart,
             payment_status='pending',
             amount=cart.total_price
         )
-        
+
         return Response({
             "payment_id": payment.id,
             "test_mode": True,

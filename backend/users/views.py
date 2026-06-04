@@ -18,10 +18,9 @@ from .serializers import (
     ResetPasswordSerializer
 )
 
-# users/views.py - замени RegisterView
 
 class RegisterView(generics.GenericAPIView):
-    """Простая регистрация без подтверждения email"""
+
     permission_classes = [AllowAny]
     serializer_class = CustomerRegistrationSerializer
 
@@ -30,7 +29,7 @@ class RegisterView(generics.GenericAPIView):
         serializer.is_valid(raise_exception=True)
 
         user_data = serializer.validated_data
-        
+
         user = Customer.objects.create(
             email=user_data['email'],
             phone=user_data['phone'],
@@ -49,6 +48,7 @@ class RegisterView(generics.GenericAPIView):
             },
             status=status.HTTP_201_CREATED
         )
+
 
 class ChangePasswordView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
@@ -81,7 +81,6 @@ class ForgotPasswordView(generics.GenericAPIView):
         user = serializer.user
         code = user.set_reset_code()
 
-        # Выводим код в консоль
         print_verification_code(
             user.email, user.first_name, code, 'password_reset')
 
@@ -114,11 +113,12 @@ class ResetPasswordView(generics.GenericAPIView):
 
 class UserProfileView(generics.GenericAPIView):
     permission_classes = [IsAuthenticated]
-    
+
     def get(self, request):
         user = request.user
         serializer = CustomerSerializer(user)
         return Response(serializer.data)
+
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer

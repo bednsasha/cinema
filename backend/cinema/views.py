@@ -13,7 +13,7 @@ class HallViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAdminOrReadOnly]  
     @action(detail=True, methods=['get'], url_path='seats')
     def seats(self, request, pk=None):
-        """Получить все места в зале (схема зала)"""
+        
         hall = self.get_object()
         seats = hall.seats.all().select_related('seat_type')
         serializer = SeatSerializer(seats, many=True)

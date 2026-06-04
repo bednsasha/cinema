@@ -4,7 +4,6 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.hashers import make_password
 
 
-# Добавь менеджер для кастомной модели
 class CustomerManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
         if not email:
@@ -45,7 +44,6 @@ class Customer(AbstractBaseUser):
         blank=True, null=True, verbose_name='Время создания кода')
     is_email_verified = models.BooleanField(default=True)
 
-    # Поля для совместимости с Django admin
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -53,7 +51,6 @@ class Customer(AbstractBaseUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'phone']
 
-    # Используем менеджер
     objects = CustomerManager()
 
     class Meta:

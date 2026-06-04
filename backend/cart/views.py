@@ -24,29 +24,25 @@ class CartViewSet(viewsets.ModelViewSet):
             return CartDetailSerializer
         return CartSerializer
 
-    # cart/views.py - добавь этот метод в класс CartViewSet
-
     def clean_expired_bookings(self, cart):
-        """Удаляет просроченные бронирования из корзины"""
+
         now = timezone.now()
         expired_bookings = cart.bookings.filter(expires_at__lt=now)
-        
+
         if expired_bookings.exists():
             count = expired_bookings.count()
             expired_bookings.delete()
-            
-            # Обновляем итоги корзины
+
             cart.total_items = cart.bookings.count()
-            cart.total_price = cart.bookings.aggregate(total=models.Sum('price'))['total'] or 0
-            
-            # Если корзина пуста, меняем статус
+            cart.total_price = cart.bookings.aggregate(
+                total=models.Sum('price'))['total'] or 0
+
             if cart.total_items == 0:
                 cart.status = 'expired'
-            
+
             cart.save()
             print(f"Deleted {count} expired bookings from cart {cart.id}")
-            
-            # Если корзина стала пустой, можно уведомить пользователя
+
             return count
         return 0
 
@@ -66,18 +62,13 @@ class CartViewSet(viewsets.ModelViewSet):
             )
         return cart
 
-   # cart/views.py - обнови метод list
-
     def list(self, request, *args, **kwargs):
         cart = self.get_or_create_active_cart()
-        
-        # Очищаем просроченные бронирования при каждом запросе
+
         self.clean_expired_bookings(cart)
-        
+
         serializer = self.get_serializer(cart)
         return Response(serializer.data)
-
-    # cart/views.py - полностью переделанный add_to_cart
 
     @action(
         detail=False,
@@ -88,20 +79,20 @@ class CartViewSet(viewsets.ModelViewSet):
         print("=== ADD TO CART ===")
         print("Request user:", request.user)
         print("Request data:", request.data)
-        
+
         session_id = request.data.get('session_id')
         seat_id = request.data.get('seat_id')
-        
+
         if not session_id or not seat_id:
             return Response(
                 {"error": "session_id и seat_id обязательны"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
+
         try:
             from showtimes.models import Session
             from cinema.models import Seat
-            
+
             session = Session.objects.get(id=int(session_id))
             seat = Seat.objects.get(id=int(seat_id))
         except Session.DoesNotExist:
@@ -119,23 +110,20 @@ class CartViewSet(viewsets.ModelViewSet):
                 {"error": str(e)},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Проверка, что место принадлежит залу сеанса
+
         if seat.hall != session.hall:
             return Response(
                 {"error": f"Место {seat.seat_number} не принадлежит залу {session.hall.name}"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Проверка, что место свободно
+
         from .models import Booking
         if Booking.objects.filter(session=session, seat=seat).exists():
             return Response(
                 {"error": "Это место уже забронировано"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-        
-        # Проверка, что место не продано
+
         try:
             from payments.models import Ticket
             if Ticket.objects.filter(booking__session=session, booking__seat=seat).exists():
@@ -145,18 +133,15 @@ class CartViewSet(viewsets.ModelViewSet):
                 )
         except ImportError:
             pass  # Если модель Ticket еще не создана
-        
-        # Получаем или создаём корзину
+
         cart = self.get_or_create_active_cart()
         print("Cart created/found:", cart.id)
-        
-        # Рассчитываем цену (временно фиксированная)
+
         price = 300
-        
-        # Создаём бронь
+
         from django.utils import timezone
         from datetime import timedelta
-        
+
         booking = Booking.objects.create(
             cart=cart,
             session=session,
@@ -164,24 +149,25 @@ class CartViewSet(viewsets.ModelViewSet):
             price=price,
             expires_at=timezone.now() + timedelta(minutes=15)
         )
-        # ПРОВЕРКА: Сеанс не должен быть завершен
+
         if session.is_past:
             return Response(
                 {"error": "Нельзя купить билет на завершенный сеанс"},
                 status=status.HTTP_400_BAD_REQUEST
             )
-    
-        # Обновляем итоги корзины
+
         from django.db import models
         cart.total_items = cart.bookings.count()
-        cart.total_price = cart.bookings.aggregate(total=models.Sum('price'))['total'] or 0
+        cart.total_price = cart.bookings.aggregate(
+            total=models.Sum('price'))['total'] or 0
         cart.expires_at = timezone.now() + timedelta(minutes=30)
         cart.save()
-        
+
         return Response(
             {"message": "Место добавлено в корзину", "booking_id": booking.id},
             status=status.HTTP_201_CREATED
         )
+
     @action(
         detail=False,
         methods=['delete'],
@@ -201,7 +187,8 @@ class CartViewSet(viewsets.ModelViewSet):
         booking.delete()
 
         cart.total_items = cart.bookings.count()
-        cart.total_price = cart.bookings.aggregate(total=models.Sum('price'))['total'] or 0
+        cart.total_price = cart.bookings.aggregate(
+            total=models.Sum('price'))['total'] or 0
         cart.save()
 
         return Response(
@@ -223,9 +210,11 @@ class CartViewSet(viewsets.ModelViewSet):
         cart.is_discount = serializer.validated_data['is_discount']
 
         if cart.is_discount:
-            cart.discount_percent = serializer.validated_data.get('discount_percent', 10)
+            cart.discount_percent = serializer.validated_data.get(
+                'discount_percent', 10)
 
-        subtotal = cart.bookings.aggregate(total=models.Sum('price'))['total'] or 0
+        subtotal = cart.bookings.aggregate(
+            total=models.Sum('price'))['total'] or 0
         if cart.is_discount:
             cart.total_price = subtotal * (100 - cart.discount_percent) / 100
         else:

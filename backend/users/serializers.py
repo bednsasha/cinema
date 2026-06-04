@@ -9,7 +9,7 @@ from django.core.exceptions import ValidationError
 
 
 class CustomerRegistrationSerializer(serializers.Serializer):
-    """Сериализатор для регистрации"""
+
     email = serializers.EmailField(required=True)
     phone = serializers.CharField(required=True)
     first_name = serializers.CharField(required=True)
@@ -62,13 +62,12 @@ class CustomerRegistrationSerializer(serializers.Serializer):
 
 
 class VerifyEmailSerializer(serializers.Serializer):
-    """Сериализатор для подтверждения email"""
 
     code = serializers.CharField(min_length=6, max_length=6, required=True)
 
 
 class CustomerSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Customer"""
+
     class Meta:
         model = Customer
         fields = ['id', 'email', 'phone', 'first_name', 'last_name', 'patronimic',
@@ -142,21 +141,16 @@ class ResetPasswordSerializer(serializers.Serializer):
 
 
 class ResendCodeSerializer(serializers.Serializer):
-    """Сериализатор для повторной отправки кода"""
+
     email = serializers.EmailField(required=True)
 
     def validate_email(self, value):
-        # Проверяем, существует ли пользователь
+
         user_exists = Customer.objects.filter(email__iexact=value).exists()
 
-        # Проверяем, есть ли активная сессия регистрации
-        # В сессии email не хранится, но мы можем проверить
         self.user_exists = user_exists
         return value.lower()
 
-# users/serializers.py - исправь последний класс
-
-# users/serializers.py - исправленный CustomTokenObtainPairSerializer
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     username_field = 'email'
@@ -164,7 +158,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        # Добавляем last_password_change в токен
+
         token['last_password_change'] = user.last_password_change.timestamp()
         return token
 
