@@ -2,20 +2,9 @@ import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
 import QRCode from 'react-qr-code';
+import type { Ticket } from '../types';
 
 const API_URL = 'http://127.0.0.1:8000/api';
-
-interface Ticket {
-  id: number;
-  qr_code: string;
-  status: string;
-  price: string;
-  session_time: string;
-  film_name: string;
-  hall_name: string;
-  row_number: number;
-  seat_number: number;
-}
 
 export default function PaymentSuccessPage() {
   const navigate = useNavigate();
@@ -184,15 +173,40 @@ export default function PaymentSuccessPage() {
                   <div className="flex-1">
                     <h3 className="font-bold text-white text-lg">{ticket.film_name}</h3>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-400 mt-2">
-                      <p>📅 {new Date(ticket.session_time).toLocaleDateString('ru-RU', {
-                        day: 'numeric', month: 'long', year: 'numeric'
-                      })}</p>
-                      <p>⏰ {new Date(ticket.session_time).toLocaleTimeString('ru-RU', {
-                        hour: '2-digit', minute: '2-digit'
-                      })}</p>
-                      <p>🏠 {ticket.hall_name}</p>
-                      <p>💺 Ряд {ticket.row_number}, Место {ticket.seat_number}</p>
-                      <p className="text-yellow-500 font-semibold">💰 {Number(ticket.price).toFixed(2)} ₽</p>
+                      <p className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        {new Date(ticket.session_time).toLocaleDateString('ru-RU', {
+                          day: 'numeric', month: 'long', year: 'numeric'
+                        })}
+                      </p>
+                      <p className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        {new Date(ticket.session_time).toLocaleTimeString('ru-RU', {
+                          hour: '2-digit', minute: '2-digit'
+                        })}
+                      </p>
+                      <p className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        {ticket.hall_name}
+                      </p>
+                      <p className="flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Ряд {ticket.row_number}, Место {ticket.seat_number}
+                      </p>
+                      <p className="text-yellow-500 font-semibold flex items-center gap-1">
+                        <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                          <path d="M10 0a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" />
+                        </svg>
+                        {Number(ticket.price).toFixed(2)} ₽
+                      </p>
                     </div>
                   </div>
                   <div className="text-center">

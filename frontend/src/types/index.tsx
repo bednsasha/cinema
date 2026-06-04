@@ -1,4 +1,3 @@
-
 export interface Genre {
   id: number;
   name: string;
@@ -10,7 +9,7 @@ export interface Movie {
   name: string;
   description: string;
   duration: number;
-  rating: string;  
+  rating: string;
   release_year: number;
   country: string;
   director: string;
@@ -75,7 +74,54 @@ export interface Seat {
   height: number;
 }
 
-export interface Booking {
+export interface SeatWithStatus extends Seat {
+  isBooked: boolean;
+  isSelected: boolean;
+  bookingId?: number;
+}
+
+export interface CartBooking {
+  id: number;
+  session: number;
+  seat: number;
+  price: number;
+  seat_detail: Seat;
+}
+
+export interface Cart {
+  id: number;
+  total_items: number;
+  total_price: number;
+  is_discount: boolean;
+  discount_percent: number;
+  send_to_email: string;
+  status: string;
+  expires_at: string;
+  bookings: CartBooking[];
+}
+
+export interface Ticket {
+  id: number;
+  qr_code: string;
+  status: string;
+  price: string;
+  session_time: string;
+  film_name: string;
+  hall_name: string;
+  row_number: number;
+  seat_number: number;
+  is_past?: boolean;
+}
+
+export interface User {
+  id: number;
+  email: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+}
+
+export interface BookingHistory {
   id: number;
   session: number;
   seats: string[];
@@ -83,4 +129,18 @@ export interface Booking {
   user_name: string;
   user_email: string;
   booking_time: string;
+}
+export interface CartBooking {
+  id: number;
+  session: number;
+  seat: number;
+  price: number;
+  seat_detail: Seat;
+  session_detail: {
+    id: number;
+    film_name: string;
+    hall_name: string;
+    screen_type_name: string;
+    start_time: string;
+  };
 }

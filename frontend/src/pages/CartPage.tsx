@@ -57,7 +57,7 @@ export default function CartPage() {
     }
     loadCart();
   }, []);
-
+  
   const showNotification = (message: string, type: 'success' | 'error' = 'error') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 3000);

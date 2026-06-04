@@ -1,31 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { sessionAPI, hallAPI, cartAPI, authAPI } from '../services/api';
-import type { Session, Seat } from '../types';
-
-interface SeatWithStatus extends Seat {
-  isBooked: boolean;
-  isSelected: boolean;
-  bookingId?: number;
-}
-
-interface CartBooking {
-  id: number;
-  session: number;
-  seat: number;
-  price: number;
-  seat_detail: Seat;
-}
-
-interface Cart {
-  id: number;
-  total_items: number;
-  total_price: number;
-  is_discount: boolean;
-  discount_percent: number;
-  bookings: CartBooking[];
-}
-
+import type { Session, Seat, SeatWithStatus, Cart, CartBooking } from '../types';
 export default function BookingPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();

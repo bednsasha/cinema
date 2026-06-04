@@ -24,7 +24,31 @@ class CartViewSet(viewsets.ModelViewSet):
             return CartDetailSerializer
         return CartSerializer
 
-    # cart/views.py - исправленный метод
+    # cart/views.py - добавь этот метод в класс CartViewSet
+
+    def clean_expired_bookings(self, cart):
+        """Удаляет просроченные бронирования из корзины"""
+        now = timezone.now()
+        expired_bookings = cart.bookings.filter(expires_at__lt=now)
+        
+        if expired_bookings.exists():
+            count = expired_bookings.count()
+            expired_bookings.delete()
+            
+            # Обновляем итоги корзины
+            cart.total_items = cart.bookings.count()
+            cart.total_price = cart.bookings.aggregate(total=models.Sum('price'))['total'] or 0
+            
+            # Если корзина пуста, меняем статус
+            if cart.total_items == 0:
+                cart.status = 'expired'
+            
+            cart.save()
+            print(f"Deleted {count} expired bookings from cart {cart.id}")
+            
+            # Если корзина стала пустой, можно уведомить пользователя
+            return count
+        return 0
 
     def get_or_create_active_cart(self):
         cart = Cart.objects.filter(
@@ -42,8 +66,14 @@ class CartViewSet(viewsets.ModelViewSet):
             )
         return cart
 
+   # cart/views.py - обнови метод list
+
     def list(self, request, *args, **kwargs):
         cart = self.get_or_create_active_cart()
+        
+        # Очищаем просроченные бронирования при каждом запросе
+        self.clean_expired_bookings(cart)
+        
         serializer = self.get_serializer(cart)
         return Response(serializer.data)
 
@@ -145,6 +175,7 @@ class CartViewSet(viewsets.ModelViewSet):
         from django.db import models
         cart.total_items = cart.bookings.count()
         cart.total_price = cart.bookings.aggregate(total=models.Sum('price'))['total'] or 0
+        cart.expires_at = timezone.now() + timedelta(minutes=30)
         cart.save()
         
         return Response(
