@@ -13,7 +13,7 @@ class FilmListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Film
         fields = ['id', 'name', 'poster', 'rating', 'duration', 
-                  'age_limit', 'age_limit_display', 'genres']
+                  'age_limit', 'age_limit_display', 'genres',  'description']
 
 class FilmDetailSerializer(serializers.ModelSerializer):
     genres = GenreSerializer(many=True, read_only=True)

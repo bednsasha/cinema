@@ -27,7 +27,7 @@ class TicketSerializer(serializers.ModelSerializer):
     hall_name = serializers.CharField(source='booking.seat.hall.name', read_only=True)
     row_number = serializers.IntegerField(source='booking.seat.row_number', read_only=True)
     seat_number = serializers.IntegerField(source='booking.seat.seat_number', read_only=True)
-    
+    price = serializers.DecimalField(max_digits=10, decimal_places=2, read_only=True) 
     class Meta:
         model = Ticket
         fields = [

@@ -309,39 +309,33 @@ class CheckPaymentStatusView(generics.GenericAPIView):
             "bookings_count": payment.cart.bookings.count()
         })
     
+    # payment/views.py - добавь проверку наличия метода
+
     def _create_tickets_from_bookings(self, payment):
-        """Создает билеты из бронирований корзины"""
+        """Создание билетов из броней корзины"""
+        from .models import Ticket
+        import hashlib
+        
         print(f"=== Creating tickets from bookings for payment {payment.id} ===")
         
-        bookings = payment.cart.bookings.all()
-        print(f"Found {bookings.count()} bookings in cart")
-        
-        tickets_created = 0
-        for booking in bookings:
-            # Проверяем, не создан ли уже билет для этого бронирования
-            existing_ticket = Ticket.objects.filter(booking=booking).first()
-            
-            if existing_ticket:
-                print(f"Ticket already exists for booking {booking.id}")
-                continue
+        for booking in payment.cart.bookings.all():
+            print(f"  Processing booking {booking.id}, price={booking.price}")
             
             # Создаем билет
             ticket = Ticket.objects.create(
-                payment=payment,
                 booking=booking,
+                payment=payment,
+                price=booking.price,
                 status='active'
             )
+            print(f"  Created ticket {ticket.id} with price {ticket.price}")
             
             # Генерируем QR-код
-            ticket.generate_qr_code()
+            unique_string = f"{ticket.id}_{booking.session.id}_{booking.seat.id}_{payment.id}_{booking.price}"
+            ticket.qr_code = hashlib.md5(unique_string.encode()).hexdigest()
+            ticket.save()
+            print(f"  QR code generated: {ticket.qr_code[:16]}...")
             
-            tickets_created += 1
-            print(f"Created ticket {ticket.id} for booking {booking.id} (Seat: {booking.seat.seat_number}, Session: {booking.session.id})")
-        
-        print(f"Total tickets created: {tickets_created}")
-        
-
-        
 class MyTicketsView(generics.GenericAPIView):
     """View для получения билетов пользователя"""
     permission_classes = [IsAuthenticated]

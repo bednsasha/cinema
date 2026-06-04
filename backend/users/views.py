@@ -112,7 +112,13 @@ class ResetPasswordView(generics.GenericAPIView):
         )
 
 
-
+class UserProfileView(generics.GenericAPIView):
+    permission_classes = [IsAuthenticated]
+    
+    def get(self, request):
+        user = request.user
+        serializer = CustomerSerializer(user)
+        return Response(serializer.data)
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer

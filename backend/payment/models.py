@@ -36,37 +36,54 @@ class Payment(models.Model):
     def __str__(self):
         return f'Платёж #{self.id} - {self.payment_status}'
 
+    # payment/models.py - исправленный mark_as_success
+
     def mark_as_success(self):
         """Отметить платеж как успешный и создать билеты"""
         self.payment_status = 'success'
-        self.yookassa_status = 'succeeded'
         self.paid_at = timezone.now()
         self.save()
 
-        # Создаем билеты для каждой брони в корзине
+        print(f"\n=== PROCESSING PAYMENT {self.id} ===")
+        print(f"Cart ID: {self.cart.id}")
+        print(f"Bookings count: {self.cart.bookings.count()}")
+        
         for booking in self.cart.bookings.all():
-            Ticket.objects.get_or_create(
+            print(f"\n--- Booking {booking.id} ---")
+            print(f"  Price from booking: {booking.price}")
+            
+            from .models import Ticket
+            ticket, created = Ticket.objects.get_or_create(
                 booking=booking,
                 defaults={
                     'payment': self,
-                    'price': booking.price,
+                    'price': booking.price,  # ← Берем цену из booking
                     'status': 'active'
                 }
             )
-
-        # Очищаем корзину - удаляем все брони
+            print(f"  Ticket created: {created}")
+            print(f"  Ticket price after create: {ticket.price}")
+            
+            if created:
+                ticket.generate_qr_code()
+                print(f"  QR code generated: {ticket.qr_code}")
+            else:
+                # Если билет уже существует, обновим его цену
+                if ticket.price != booking.price:
+                    ticket.price = booking.price
+                    ticket.save()
+                    print(f"  Updated ticket price to {ticket.price}")
+        
+        # Очищаем корзину
         bookings_deleted = self.cart.bookings.all().delete()
-        print(f"Deleted {bookings_deleted} bookings from cart {self.cart.id}")
-
-        # Обновляем статус и итоги корзины
+        print(f"\nDeleted {bookings_deleted} bookings")
+        
         self.cart.status = 'paid'
         self.cart.total_items = 0
         self.cart.total_price = 0
         self.cart.save()
-
-        print(f"Cart {self.cart.id} cleaned and marked as paid")
-
-
+        
+        print(f"Cart {self.cart.id} marked as paid\n")
 class Ticket(models.Model):
     STATUS_CHOICES = [
         ('active', 'Активен'),
@@ -92,26 +109,40 @@ class Ticket(models.Model):
     def __str__(self):
         return f'Билет #{self.id} - {self.booking.seat}'
 
+    # payment/models.py - исправленный generate_qr_code
+
     def generate_qr_code(self):
-        # Ваша логика генерации QR-кода
+        """Генерация QR-кода для билета"""
         import qrcode
         from io import BytesIO
-        from django.core.files import File
+        from django.core.files.base import ContentFile
+        import hashlib
         
         # Создаем данные для QR-кода
-        qr_data = f"Ticket ID: {self.id}\nBooking ID: {self.booking.id}\nSeat: {self.booking.seat.seat_number}\nSession: {self.booking.session.id}"
+        qr_data = f"""
+        Билет #{self.id}
+        Фильм: {self.booking.session.rental.film.name}
+        Дата: {self.booking.session.start_time.strftime('%d.%m.%Y %H:%M')}
+        Зал: {self.booking.session.hall.name}
+        Ряд: {self.booking.seat.row_number}
+        Место: {self.booking.seat.seat_number}
+        """
         
+        # Генерируем QR-код
         qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(qr_data)
+        qr.add_data(qr_data.strip())
         qr.make(fit=True)
         
         img = qr.make_image(fill_color="black", back_color="white")
         
-        # Сохраняем в поле ImageField
+        # Сохраняем в базу как строку (не как файл)
         buffer = BytesIO()
-        img.save(buffer, 'PNG')
-        buffer.seek(0)
+        img.save(buffer, format='PNG')
+        import base64
+        qr_base64 = base64.b64encode(buffer.getvalue()).decode('utf-8')
         
-        filename = f"ticket_{self.id}_{self.booking.id}.png"
-        self.qr_code.save(filename, File(buffer), save=False)
+        # Сохраняем как base64 строку в поле qr_code
+        self.qr_code = f"data:image/png;base64,{qr_base64}"
         self.save()
+        
+        return self.qr_code
