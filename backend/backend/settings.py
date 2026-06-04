@@ -46,7 +46,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'USER_ID_FIELD': 'id',  # поле, которое используется как идентификатор
+    'USER_ID_FIELD': 'id',
     'USER_ID_CLAIM': 'user_id',
     'AUTH_TOKEN_CLASSES': ('rest_framework_simplejwt.tokens.AccessToken',),
     'TOKEN_TYPE_CLAIM': 'token_type',
@@ -54,7 +54,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 AUTH_USER_MODEL = 'users.Customer'
-# Application definition
+
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -146,7 +146,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'Europe/Moscow'
+TIME_ZONE = 'UTC'
 
 USE_I18N = True
 
@@ -174,7 +174,7 @@ CORS_ALLOW_METHODS = [
     'PUT',
 ]
 
-# Разрешить нужные заголовки
+
 CORS_ALLOW_HEADERS = [
     'accept',
     'accept-encoding',
