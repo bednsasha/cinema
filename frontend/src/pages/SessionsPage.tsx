@@ -20,7 +20,7 @@ const SessionsPage: React.FC = () => {
   const fetchData = async () => {
     try {
       const [sessionsRes, movieRes] = await Promise.all([
-        sessionAPI.getByMovie(Number(movieId)),
+        sessionAPI.getByFilm(Number(movieId)),  // ← изменено с getByMovie на getByFilm
         movieAPI.getById(Number(movieId))
       ]);
       
@@ -56,13 +56,13 @@ const SessionsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-red-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
       <div className="container mx-auto px-6">
         {/* Movie Info */}
         <motion.div
@@ -72,13 +72,13 @@ const SessionsPage: React.FC = () => {
         >
           <div className="flex flex-col md:flex-row gap-6 items-center">
             <img
-              src={movie?.poster}
+              src={movie?.poster ? `http://127.0.0.1:8000${movie.poster}` : 'https://via.placeholder.com/300x400'}
               alt={movie?.name}
               className="w-32 h-48 object-cover rounded-lg shadow-lg"
             />
             <div>
-              <h1 className="text-3xl md:text-4xl font-bold mb-2">{movie?.title}</h1>
-              <p className="text-gray-400">{movie?.duration} мин • {movie?.genre.join(', ')}</p>
+              <h1 className="text-3xl md:text-4xl font-bold mb-2">{movie?.name}</h1>
+              <p className="text-gray-400">{movie?.duration} мин</p>
               <p className="text-gray-300 mt-4 max-w-2xl">{movie?.description}</p>
             </div>
           </div>
@@ -99,7 +99,7 @@ const SessionsPage: React.FC = () => {
               onClick={() => setSelectedDate('all')}
               className={`px-6 py-2 rounded-lg font-semibold transition-all ${
                 selectedDate === 'all'
-                  ? 'bg-gradient-to-r from-red-500 to-purple-600 text-white'
+                  ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
                   : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
               }`}
             >
@@ -113,7 +113,7 @@ const SessionsPage: React.FC = () => {
                 onClick={() => setSelectedDate(date)}
                 className={`px-6 py-2 rounded-lg font-semibold transition-all ${
                   selectedDate === date
-                    ? 'bg-gradient-to-r from-red-500 to-purple-600 text-white'
+                    ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
                     : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
                 }`}
               >
@@ -143,7 +143,7 @@ const SessionsPage: React.FC = () => {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div>
-                    <div className="text-3xl font-bold text-red-500">
+                    <div className="text-3xl font-bold text-blue-500">
                       {new Date(session.start_time).toLocaleTimeString('ru-RU', {
                         hour: '2-digit',
                         minute: '2-digit'
@@ -158,26 +158,22 @@ const SessionsPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="text-2xl font-bold">{session.price} ₽</div>
-                    <div className="text-sm text-gray-400">Зал: {session.hall}</div>
+                    <div className="text-2xl font-bold">Цена уточняется</div>
+                    <div className="text-sm text-gray-400">Зал: {session.hall_name}</div>
                   </div>
                 </div>
 
                 <div className="mb-4">
                   <div className="flex justify-between text-sm mb-2">
                     <span>Доступно мест:</span>
-                    <span className={session.available_seats < 10 ? 'text-red-500 font-bold' : 'text-green-500'}>
-                      {session.available_seats}
-                    </span>
+                    <span className="text-green-500">Уточняйте</span>
                   </div>
                   <div className="w-full bg-gray-700 rounded-full h-2">
                     <motion.div
                       initial={{ width: 0 }}
-                      animate={{ width: `${(session.available_seats / 100) * 100}%` }}
+                      animate={{ width: `50%` }}
                       transition={{ duration: 0.8, delay: index * 0.1 }}
-                      className={`h-2 rounded-full ${
-                        session.available_seats < 10 ? 'bg-red-500' : 'bg-green-500'
-                      }`}
+                      className="h-2 rounded-full bg-green-500"
                     />
                   </div>
                 </div>
@@ -186,14 +182,9 @@ const SessionsPage: React.FC = () => {
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   onClick={() => navigate(`/booking/${session.id}`)}
-                  disabled={session.available_seats === 0}
-                  className={`w-full py-3 rounded-lg font-semibold transition-all ${
-                    session.available_seats > 0
-                      ? 'bg-gradient-to-r from-red-500 to-purple-600 hover:shadow-lg text-white'
-                      : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                  }`}
+                  className="w-full py-3 rounded-lg font-semibold transition-all bg-gradient-to-r from-blue-500 to-indigo-600 hover:shadow-lg text-white"
                 >
-                  {session.available_seats > 0 ? 'Выбрать места' : 'Нет свободных мест'}
+                  Выбрать места
                 </motion.button>
               </motion.div>
             ))}

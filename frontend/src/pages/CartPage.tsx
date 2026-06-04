@@ -159,7 +159,7 @@ export default function CartPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
@@ -174,7 +174,7 @@ export default function CartPage() {
             <p className="text-gray-400 mb-6">Добавьте билеты из расписания</p>
             <Link
               to="/schedule"
-              className="inline-block px-6 py-3 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold text-white hover:opacity-90 transition"
+              className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition"
             >
               Выбрать билеты
             </Link>
@@ -219,7 +219,7 @@ export default function CartPage() {
                 </h2>
                 <button
                   onClick={handleClearCart}
-                  className="text-red-400 text-sm hover:text-red-300 transition"
+                  className="text-blue-400 text-sm hover:text-blue-300 transition"
                 >
                   Очистить корзину
                 </button>
@@ -253,10 +253,10 @@ export default function CartPage() {
                             </p>
                           </div>
                           <div className="flex items-center gap-4">
-                            <p className="font-bold text-red-400">{booking.price} ₽</p>
+                            <p className="font-bold text-blue-400">{booking.price} ₽</p>
                             <button
                               onClick={() => handleRemoveItem(booking.id)}
-                              className="text-gray-400 hover:text-red-400 transition"
+                              className="text-gray-400 hover:text-blue-400 transition"
                             >
                               🗑️
                             </button>
@@ -291,7 +291,7 @@ export default function CartPage() {
                 <div className="border-t border-gray-700 pt-3">
                   <div className="flex justify-between text-xl font-bold">
                     <span className="text-white">Итого:</span>
-                    <span className="text-red-500">{Math.round(total)} ₽</span>
+                    <span className="text-blue-500">{Math.round(total)} ₽</span>
                   </div>
                 </div>
               </div>
@@ -320,7 +320,7 @@ export default function CartPage() {
                 {cart.is_discount && (
                   <button
                     onClick={handleRemoveDiscount}
-                    className="text-sm text-red-400 mt-2 hover:text-red-300"
+                    className="text-sm text-blue-400 mt-2 hover:text-blue-300"
                   >
                     Удалить скидку
                   </button>
@@ -345,7 +345,7 @@ export default function CartPage() {
               <button
                 onClick={handleCheckout}
                 disabled={creatingPayment}
-                className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
+                className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
               >
                 {creatingPayment ? 'Создание платежа...' : 'Перейти к оплате →'}
               </button>

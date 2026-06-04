@@ -25,7 +25,13 @@ export default function HomePage() {
     // Загружаем сеансы на сегодня
     sessionAPI.getTodaySessions()
       .then(response => {
-        setTodaySessions(response.data);
+        // Фильтруем только будущие сеансы
+        const now = new Date();
+        const futureSessions = response.data.filter(session => {
+          const sessionDate = new Date(session.start_time);
+          return sessionDate > now;
+        });
+        setTodaySessions(futureSessions);
         setLoadingSessions(false);
       })
       .catch(error => {
@@ -43,10 +49,17 @@ export default function HomePage() {
     return acc;
   }, {} as Record<string, Session[]>);
 
+  // Функция проверки, завершен ли сеанс
+  const isSessionPast = (session: Session) => {
+    const sessionDate = new Date(session.start_time);
+    const now = new Date();
+    return sessionDate < now;
+  };
+
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
@@ -72,7 +85,7 @@ export default function HomePage() {
       <div className="container mx-auto px-6 py-16">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-white mb-2">Сейчас в прокате</h2>
-          <div className="w-24 h-1 bg-gradient-to-r from-red-500 to-purple-600 mx-auto rounded-full"></div>
+          <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
         </div>
 
         {movies.length === 0 ? (
@@ -101,7 +114,7 @@ export default function HomePage() {
                         ★ {movie.rating}
                       </div>
                     )}
-                    <div className="absolute top-4 left-4 bg-red-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+                    <div className="absolute top-4 left-4 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-bold">
                       {movie.age_limit_display}
                     </div>
                   </div>
@@ -128,7 +141,7 @@ export default function HomePage() {
                   </div>
                   
                   <div className="p-5 pt-0">
-                    <button className="w-full py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity">
+                    <button className="w-full py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity">
                       Купить билет
                     </button>
                   </div>
@@ -149,7 +162,7 @@ export default function HomePage() {
             </div>
             <Link 
               to="/schedule" 
-              className="px-4 py-2 bg-red-600 rounded-lg hover:bg-red-700 transition"
+              className="px-4 py-2 bg-blue-600 rounded-lg hover:bg-blue-700 transition"
             >
               Все сеансы →
             </Link>
@@ -157,7 +170,7 @@ export default function HomePage() {
           
           {loadingSessions ? (
             <div className="text-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-500 mx-auto"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500 mx-auto"></div>
             </div>
           ) : Object.keys(groupedTodaySessions).length === 0 ? (
             <p className="text-gray-400 text-center py-4">Нет сеансов на сегодня</p>
@@ -167,23 +180,39 @@ export default function HomePage() {
                 <div key={filmName} className="border-b border-gray-700 pb-4 last:border-0">
                   <h3 className="text-lg font-semibold text-white mb-3">{filmName}</h3>
                   <div className="flex flex-wrap gap-3">
-                    {sessions.map((session) => (
-                      <Link
-                        key={session.id}
-                        to={`/booking/${session.id}`}
-                        className="px-4 py-2 bg-gray-700 rounded-lg hover:bg-red-600 transition text-center"
-                      >
-                        <div className="text-lg font-bold">
-                          {new Date(session.start_time).toLocaleTimeString('ru-RU', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          })}
-                        </div>
-                        <div className="text-xs text-gray-400 mt-1">
-                          {session.hall_name} • {session.screen_type_name}
-                        </div>
-                      </Link>
-                    ))}
+                    {sessions.map((session) => {
+                      const isPast = isSessionPast(session);
+                      return (
+                        <Link
+                          key={session.id}
+                          to={!isPast ? `/booking/${session.id}` : '#'}
+                          onClick={(e) => {
+                            if (isPast) {
+                              e.preventDefault();
+                              alert('Этот сеанс уже завершен');
+                            }
+                          }}
+                          className={`px-4 py-2 rounded-lg transition text-center ${
+                            isPast 
+                              ? 'bg-gray-700 opacity-50 cursor-not-allowed' 
+                              : 'bg-gray-700 hover:bg-blue-600'
+                          }`}
+                        >
+                          <div className={`text-lg font-bold ${isPast ? 'text-gray-500' : 'text-white'}`}>
+                            {new Date(session.start_time).toLocaleTimeString('ru-RU', {
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
+                          </div>
+                          <div className={`text-xs mt-1 ${isPast ? 'text-gray-500' : 'text-gray-400'}`}>
+                            {session.hall_name} • {session.screen_type_name}
+                          </div>
+                          {isPast && (
+                            <div className="text-xs text-gray-500 mt-1">Завершен</div>
+                          )}
+                        </Link>
+                      );
+                    })}
                   </div>
                 </div>
               ))}

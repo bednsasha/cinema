@@ -173,19 +173,22 @@ export default function BookingPage() {
 };
 
   const getSeatColor = (seat: SeatWithStatus): string => {
-    if (seat.isBooked) return 'bg-gray-600 cursor-not-allowed';
-    if (seat.isSelected) return 'bg-green-500 hover:bg-green-600';
-    
-    switch (seat.seat_type_detail?.name) {
-      case 'vip':
-        return 'bg-purple-600 hover:bg-purple-700';
-      case 'sofa':
-        return 'bg-blue-600 hover:bg-blue-700';
-      default:
-        return 'bg-gray-700 hover:bg-gray-600';
-    }
-  };
-
+  if (seat.isBooked) return 'bg-red-800 cursor-not-allowed opacity-70';
+  
+  // Выбранные места - ярко-зеленые
+  if (seat.isSelected) return 'bg-green-500 hover:bg-green-600 text-white';
+  
+  // Свободные места - в зависимости от типа
+  switch (seat.seat_type_detail?.name) {
+    case 'vip':
+      return 'bg-purple-600 hover:bg-purple-700 text-white';
+    case 'sofa':
+      return 'bg-blue-600 hover:bg-blue-700 text-white';
+    default:
+      // Обычные свободные места - светло-серые
+      return 'bg-gray-600 hover:bg-gray-500 text-white';
+  }
+};
   const getSeatTypeLabel = (seat: SeatWithStatus): string => {
     switch (seat.seat_type_detail?.name) {
       case 'vip':
@@ -200,7 +203,7 @@ export default function BookingPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
@@ -289,7 +292,7 @@ export default function BookingPage() {
                             >
                               <span className="text-xs font-medium">{seat.seat_number}</span>
                               {getSeatTypeLabel(seat) && (
-                                <span className="absolute -top-2 -right-2 text-[8px] bg-red-500 rounded-full px-1">
+                                <span className="absolute -top-2 -right-2 text-[8px] bg-blue-500 rounded-full px-1">
                                   {getSeatTypeLabel(seat)}
                                 </span>
                               )}
@@ -303,27 +306,27 @@ export default function BookingPage() {
               )}
               
               <div className="flex flex-wrap justify-center gap-6 mt-8 pt-6 border-t border-gray-700">
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-gray-700 rounded" />
-                  <span className="text-sm text-gray-400">Свободно</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-green-500 rounded" />
-                  <span className="text-sm text-gray-400">Выбрано</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-gray-600 rounded" />
-                  <span className="text-sm text-gray-400">Занято</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-purple-600 rounded" />
-                  <span className="text-sm text-gray-400">VIP</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <div className="w-6 h-6 bg-blue-600 rounded" />
-                  <span className="text-sm text-gray-400">Диван</span>
-                </div>
-              </div>
+  <div className="flex items-center gap-2">
+    <div className="w-6 h-6 bg-gray-600 rounded" />
+    <span className="text-sm text-gray-400">Свободно</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-6 h-6 bg-green-500 rounded" />
+    <span className="text-sm text-gray-400">Выбрано</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-6 h-6 bg-red-800 rounded" />
+    <span className="text-sm text-gray-400">Занято</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-6 h-6 bg-purple-600 rounded" />
+    <span className="text-sm text-gray-400">VIP</span>
+  </div>
+  <div className="flex items-center gap-2">
+    <div className="w-6 h-6 bg-blue-600 rounded" />
+    <span className="text-sm text-gray-400">Диван</span>
+  </div>
+</div>
             </div>
           </div>
           
@@ -334,7 +337,7 @@ export default function BookingPage() {
                 {cart && cart.total_items > 0 && (
                   <button
                     onClick={() => setShowCart(!showCart)}
-                    className="text-red-400 text-sm hover:text-red-300"
+                    className="text-blue-400 text-sm hover:text-blue-300"
                   >
                     {showCart ? 'Скрыть' : 'Показать'}
                   </button>
@@ -366,13 +369,13 @@ export default function BookingPage() {
                               </p>
                             </div>
                             <div className="text-right">
-                              <p className="font-bold text-red-400">{booking.price} ₽</p>
+                              <p className="font-bold text-blue-400">{booking.price} ₽</p>
                               <button
                                 onClick={() => {
                                   const foundSeat = seats.find((s: SeatWithStatus) => s.id === booking.seat);
                                   if (foundSeat) handleSeatClick(foundSeat);
                                 }}
-                                className="text-xs text-gray-400 hover:text-red-400"
+                                className="text-xs text-gray-400 hover:text-blue-400"
                               >
                                 Удалить
                               </button>
@@ -396,7 +399,7 @@ export default function BookingPage() {
                     )}
                     <div className="flex justify-between text-xl font-bold">
                       <span className="text-white">Итого:</span>
-                      <span className="text-red-500">{cart.total_price} ₽</span>
+                      <span className="text-blue-500">{cart.total_price} ₽</span>
                     </div>
                   </div>
                   
@@ -406,7 +409,7 @@ export default function BookingPage() {
                         navigate('/cart');
                       }
                     }}
-                    className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold text-white hover:opacity-90 transition"
+                    className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition"
                   >
                     {cart.total_items > 0 ? 'Перейти к оформлению →' : 'Выберите места'}
                   </button>

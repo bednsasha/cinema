@@ -90,7 +90,7 @@ export default function MovieDetailPage() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
@@ -137,7 +137,7 @@ export default function MovieDetailPage() {
                     ★ {movie.rating}
                   </span>
                 )}
-                <span className="bg-red-600 text-white px-3 py-1 rounded-full text-sm font-bold">
+                <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
                   {movie.age_limit_display}
                 </span>
                 <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
@@ -180,7 +180,7 @@ export default function MovieDetailPage() {
                   href={movie.trailer_url} 
                   target="_blank" 
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-red-500 hover:text-red-400 transition"
+                  className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-400 transition"
                 >
                   <span>▶ Смотреть трейлер</span>
                 </a>
@@ -206,7 +206,7 @@ export default function MovieDetailPage() {
                         onClick={() => setSelectedDate(date)}
                         className={`px-4 py-2 rounded-lg text-sm font-semibold transition ${
                           selectedDate === date
-                            ? 'bg-gradient-to-r from-red-500 to-purple-600 text-white'
+                            ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white'
                             : 'bg-gray-700 text-gray-300 hover:bg-gray-600'
                         }`}
                       >
@@ -252,8 +252,8 @@ export default function MovieDetailPage() {
                               {isPast ? (
                                 <span className="text-sm text-gray-500">Завершен</span>
                               ) : (
-                                <div className="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center group-hover:bg-red-500/30 transition">
-                                  <span className="text-red-400 text-xl">→</span>
+                                <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center group-hover:bg-blue-500/30 transition">
+                                  <span className="text-blue-400 text-xl">→</span>
                                 </div>
                               )}
                             </div>

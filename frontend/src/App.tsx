@@ -9,12 +9,24 @@ import RegisterPage from './pages/RegisterPage';
 import CartPage from './pages/CartPage';
 import PaymentPage from './pages/PaymentSuccessPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import ProfilePage from './pages/ProfilePage';
+import MoviesPage from './pages/MoviesPage';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+gsap.registerPlugin(ScrollTrigger);
+const meta = document.createElement('meta');
+meta.name = 'viewport';
+meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes';
+document.head.appendChild(meta);
+
 function App() {
   return (
     <BrowserRouter>
+    <div className="min-h-screen bg-black">
       <Navbar />
       <Routes>
         <Route path="/" element={<HomePage />} />
+        <Route path="/movies" element={<MoviesPage />} />
         <Route path="/movie/:id" element={<MovieDetailPage />} />
         <Route path="/schedule" element={<SchedulePage />} />
         <Route path="/booking/:sessionId" element={<BookingPage />} />
@@ -23,7 +35,10 @@ function App() {
         <Route path="/cart" element={<CartPage />} />
         <Route path="/payment" element={<PaymentPage />} />
 <Route path="/payment/success" element={<PaymentSuccessPage />} />
+      <Route path="/profile" element={<ProfilePage />} />
+      
       </Routes>
+      </div>
     </BrowserRouter>
   );
 }

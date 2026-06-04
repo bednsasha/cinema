@@ -100,8 +100,8 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div className="bg-red-900/50 border border-red-600 rounded-lg p-3 mb-6">
-            <p className="text-red-400 text-sm">{error}</p>
+          <div className="bg-blue-900/50 border border-blue-600 rounded-lg p-3 mb-6">
+            <p className="text-blue-400 text-sm">{error}</p>
           </div>
         )}
 
@@ -117,7 +117,7 @@ export default function RegisterPage() {
               required
             />
             {fieldErrors.email && (
-              <p className="text-red-400 text-xs mt-1">{fieldErrors.email.join(', ')}</p>
+              <p className="text-blue-400 text-xs mt-1">{fieldErrors.email.join(', ')}</p>
             )}
           </div>
 
@@ -133,7 +133,7 @@ export default function RegisterPage() {
               required
             />
             {fieldErrors.phone && (
-              <p className="text-red-400 text-xs mt-1">{fieldErrors.phone.join(', ')}</p>
+              <p className="text-blue-400 text-xs mt-1">{fieldErrors.phone.join(', ')}</p>
             )}
           </div>
 
@@ -148,7 +148,7 @@ export default function RegisterPage() {
               required
             />
             {fieldErrors.first_name && (
-              <p className="text-red-400 text-xs mt-1">{fieldErrors.first_name.join(', ')}</p>
+              <p className="text-blue-400 text-xs mt-1">{fieldErrors.first_name.join(', ')}</p>
             )}
           </div>
 
@@ -163,7 +163,7 @@ export default function RegisterPage() {
               required
             />
             {fieldErrors.last_name && (
-              <p className="text-red-400 text-xs mt-1">{fieldErrors.last_name.join(', ')}</p>
+              <p className="text-blue-400 text-xs mt-1">{fieldErrors.last_name.join(', ')}</p>
             )}
           </div>
 
@@ -189,7 +189,7 @@ export default function RegisterPage() {
               required
             />
             {fieldErrors.password && (
-              <p className="text-red-400 text-xs mt-1">{fieldErrors.password.join(', ')}</p>
+              <p className="text-blue-400 text-xs mt-1">{fieldErrors.password.join(', ')}</p>
             )}
           </div>
 
@@ -204,7 +204,7 @@ export default function RegisterPage() {
               required
             />
             {fieldErrors.confirm_password && (
-              <p className="text-red-400 text-xs mt-1">{fieldErrors.confirm_password.join(', ')}</p>
+              <p className="text-blue-400 text-xs mt-1">{fieldErrors.confirm_password.join(', ')}</p>
             )}
           </div>
 
@@ -222,7 +222,7 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
           >
             {loading ? 'Регистрация...' : 'Зарегистрироваться'}
           </button>
@@ -231,7 +231,7 @@ export default function RegisterPage() {
         <div className="mt-6 text-center">
           <p className="text-gray-400 text-sm">
             Уже есть аккаунт?{' '}
-            <Link to="/login" className="text-red-400 hover:text-red-300">
+            <Link to="/login" className="text-blue-400 hover:text-blue-300">
               Войти
             </Link>
           </p>

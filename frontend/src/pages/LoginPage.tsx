@@ -66,8 +66,8 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="bg-red-900/50 border border-red-600 rounded-lg p-3 mb-6">
-            <p className="text-red-400 text-sm">{error}</p>
+          <div className="bg-blue-900/50 border border-blue-600 rounded-lg p-3 mb-6">
+            <p className="text-blue-400 text-sm">{error}</p>
           </div>
         )}
 
@@ -99,7 +99,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
+            className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
           >
             {loading ? 'Вход...' : 'Войти'}
           </button>
@@ -108,7 +108,7 @@ export default function LoginPage() {
         <div className="mt-6 text-center">
           <p className="text-gray-400 text-sm">
             Нет аккаунта?{' '}
-            <Link to="/register" className="text-red-400 hover:text-red-300">
+            <Link to="/register" className="text-blue-400 hover:text-blue-300">
               Зарегистрироваться
             </Link>
           </p>

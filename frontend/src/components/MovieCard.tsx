@@ -14,27 +14,31 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
 
   useEffect(() => {
     gsap.fromTo(cardRef.current,
-      { opacity: 0, y: 50, rotationX: -15 },
+      { opacity: 0, y: 50 },
       {
         opacity: 1,
         y: 0,
-        rotationX: 0,
         duration: 0.6,
         delay: index * 0.1,
         ease: 'power3.out',
-        scrollTrigger: {
-          trigger: cardRef.current,
-          start: 'top bottom-=100',
-          toggleActions: 'play none none reverse',
-        },
       }
     );
   }, [index]);
 
-  // Формируем URL постера (если есть poster, иначе заглушка)
   const posterUrl = movie.poster 
-    ? `http://127.0.0.1:8000${movie.poster}` 
+    ? movie.poster.startsWith('http') 
+      ? movie.poster 
+      : `http://127.0.0.1:8000${movie.poster}`
     : 'https://via.placeholder.com/300x400/1a1a1a/ffffff?text=No+Poster';
+
+  // Получаем жанры (могут быть массивом объектов или массивом строк)
+  const genresList = movie.genres || [];
+  const displayGenres = genresList.slice(0, 3).map((genre: any, idx: number) => 
+    typeof genre === 'string' ? genre : genre.name
+  );
+
+  // Описание фильма
+  const description = movie.description || 'Описание отсутствует';
 
   return (
     <motion.div
@@ -45,70 +49,62 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
     >
       <Link to={`/movie/${movie.id}`}>
         <div className="relative overflow-hidden h-80">
-          <motion.img
+          <img
             src={posterUrl}
             alt={movie.name}
-            className="w-full h-full object-cover"
-            whileHover={{ scale: 1.1 }}
-            transition={{ duration: 0.3 }}
+            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+            onError={(e) => {
+              (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x400/1a1a1a/ffffff?text=No+Poster';
+            }}
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
           
-          {/* Rating Badge */}
           {movie.rating && (
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="absolute top-4 right-4 bg-yellow-500 text-black px-2 py-1 rounded-full font-bold text-sm"
-            >
+            <div className="absolute top-4 right-4 bg-yellow-500 text-black px-2 py-1 rounded-full font-bold text-sm">
               ★ {movie.rating}
-            </motion.div>
+            </div>
           )}
           
-          {/* Age Limit Badge */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="absolute top-4 left-4 bg-red-600 text-white px-2 py-1 rounded-full font-bold text-xs"
-          >
-            {movie.age_limit}
-          </motion.div>
+          <div className="absolute top-4 left-4 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+            {movie.age_limit_display || movie.age_limit || '0+'}
+          </div>
         </div>
 
-        <div className="p-6">
-          <h3 className="text-xl font-bold mb-2 group-hover:text-red-500 transition-colors line-clamp-1">
+        <div className="p-5">
+          <h3 className="text-xl font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-400 transition-colors">
             {movie.name}
           </h3>
           
-          <div className="flex items-center gap-4 text-sm text-gray-400 mb-3">
+          <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
             <span>{movie.duration} мин</span>
             <span>•</span>
-            <span>{movie.release_year}</span>
+            <span>{movie.release_year || '2024'}</span>
             <span>•</span>
-            <span>{movie.country}</span>
+            <span>{movie.country || 'Россия'}</span>
           </div>
           
           <div className="flex flex-wrap gap-1 mb-3">
-            {movie.genres?.slice(0, 3).map((genre) => (
-              <span key={genre.id} className="text-xs px-2 py-1 bg-gray-700 rounded-full text-gray-300">
-                {genre.name}
+            {displayGenres.length > 0 ? (
+              displayGenres.map((genre: string, idx: number) => (
+                <span key={idx} className="text-xs px-2 py-1 bg-gray-700 rounded-full text-gray-300">
+                  {genre}
+                </span>
+              ))
+            ) : (
+              <span className="text-xs px-2 py-1 bg-gray-700 rounded-full text-gray-300">
+                Без жанра
               </span>
-            ))}
+            )}
           </div>
           
-          <p className="text-gray-300 text-sm line-clamp-2">
-            {movie.description}
+          <p className="text-gray-400 text-sm line-clamp-2">
+            {description}
           </p>
-
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            className="mt-4 w-full py-2 bg-gradient-to-r from-red-500 to-purple-600 rounded-lg font-semibold"
-          >
+        </div>
+        
+        <div className="p-5 pt-0">
+          <button className="w-full py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity">
             Купить билет
-          </motion.button>
+          </button>
         </div>
       </Link>
     </motion.div>
