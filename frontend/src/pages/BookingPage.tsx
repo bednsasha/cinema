@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { sessionAPI, hallAPI, cartAPI, authAPI } from '../services/api';
 import type { Session, Seat, SeatWithStatus, Cart, CartBooking } from '../types';
+
 export default function BookingPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
@@ -181,39 +182,39 @@ export default function BookingPage() {
   const hallName = typeof session.hall === 'object' ? (session.hall as any).name : session.hall_name;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12">
-      <div className="container mx-auto px-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-8 md:py-12">
+      <div className="container mx-auto px-4 md:px-6">
         {notification && (
-          <div className={`fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg ${
+          <div className={`fixed top-16 md:top-20 right-2 md:right-4 z-50 p-2 md:p-4 rounded-lg shadow-lg text-xs md:text-sm ${
             notification.type === 'success' ? 'bg-green-600' : notification.type === 'error' ? 'bg-red-600' : 'bg-blue-600'
-          } text-white animate-fade-in`}>
+          } text-white animate-fade-in max-w-[200px] md:max-w-none`}>
             {notification.message}
           </div>
         )}
 
-        <div className="bg-gray-800 rounded-xl p-6 mb-8">
-          <h1 className="text-2xl font-bold text-white mb-2">{session.film_name}</h1>
-          <div className="flex flex-wrap gap-4 text-gray-400">
+        <div className="bg-gray-800 rounded-lg md:rounded-xl p-4 md:p-6 mb-6 md:mb-8">
+          <h1 className="text-lg md:text-2xl font-bold text-white mb-2">{session.film_name}</h1>
+          <div className="flex flex-wrap gap-2 md:gap-4 text-xs md:text-sm text-gray-400">
             <span className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               {new Date(session.start_time).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'long' })}
             </span>
             <span className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               {new Date(session.start_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
             </span>
             <span className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
               </svg>
               {hallName}
             </span>
             <span className="flex items-center gap-1">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-3 h-3 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
               </svg>
               {session.screen_type_name}
@@ -222,54 +223,54 @@ export default function BookingPage() {
         </div>
 
         {!isAuthenticated && (
-          <div className="bg-yellow-900/50 border border-yellow-600 rounded-xl p-4 mb-6 text-center">
-            <p className="text-yellow-400">Для выбора мест необходимо войти в систему</p>
+          <div className="bg-yellow-900/50 border border-yellow-600 rounded-lg md:rounded-xl p-3 md:p-4 mb-4 md:mb-6 text-center">
+            <p className="text-yellow-400 text-xs md:text-sm">Для выбора мест необходимо войти в систему</p>
             <button
               onClick={() => navigate('/login')}
-              className="mt-2 px-4 py-1 bg-yellow-600 rounded-lg text-sm hover:bg-yellow-700 transition"
+              className="mt-1 md:mt-2 px-3 md:px-4 py-0.5 md:py-1 bg-yellow-600 rounded-lg text-xs md:text-sm hover:bg-yellow-700 transition"
             >
               Войти
             </button>
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           <div className="lg:col-span-2">
-            <div className="bg-gray-800 rounded-xl p-6">
-              <h2 className="text-xl font-bold text-white mb-4">Выберите места</h2>
+            <div className="bg-gray-800 rounded-lg md:rounded-xl p-4 md:p-6">
+              <h2 className="text-lg md:text-xl font-bold text-white mb-4">Выберите места</h2>
               
-              <div className="mb-8">
-                <div className="w-full h-2 bg-gradient-to-r from-transparent via-yellow-500 to-transparent rounded-full mb-2" />
-                <div className="text-center text-gray-400 text-sm">ЭКРАН</div>
+              <div className="mb-6 md:mb-8">
+                <div className="w-full h-1 md:h-2 bg-gradient-to-r from-transparent via-yellow-500 to-transparent rounded-full mb-2" />
+                <div className="text-center text-gray-400 text-[10px] md:text-sm">ЭКРАН</div>
               </div>
               
               {seats.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-400">Нет данных о местах в этом зале</p>
+                <div className="text-center py-8 md:py-12">
+                  <p className="text-gray-400 text-sm md:text-base">Нет данных о местах в этом зале</p>
                 </div>
               ) : (
                 <div className="overflow-x-auto">
                   {sortedRows.map((rowNum) => (
-                    <div key={rowNum} className="mb-4 flex justify-center">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-400 text-sm w-8 font-bold">{rowNum}</span>
-                        <div className="flex flex-wrap gap-2">
+                    <div key={rowNum} className="mb-2 md:mb-4 flex justify-center">
+                      <div className="flex items-center gap-1 md:gap-2">
+                        <span className="text-gray-400 text-xs md:text-sm w-6 md:w-8 font-bold">{rowNum}</span>
+                        <div className="flex flex-wrap gap-1 md:gap-2">
                           {seatsByRow[Number(rowNum)].map((seat) => (
                             <button
                               key={seat.id}
                               onClick={() => handleSeatClick(seat)}
                               disabled={seat.isBooked || !isAuthenticated}
-                              className={`relative w-10 h-10 md:w-12 md:h-12 rounded-lg transition-all font-medium ${getSeatColor(seat)} ${seat.isBooked ? 'line-through opacity-60' : ''} ${!seat.isBooked && !seat.isSelected ? 'hover:scale-105' : ''} disabled:cursor-not-allowed`}
+                              className={`relative w-8 h-8 md:w-12 md:h-12 rounded-lg transition-all font-medium ${getSeatColor(seat)} ${seat.isBooked ? 'line-through opacity-60' : ''} ${!seat.isBooked && !seat.isSelected ? 'hover:scale-105' : ''} disabled:cursor-not-allowed`}
                               title={`Ряд ${seat.row_number}, Место ${seat.seat_number}${getSeatTypeLabel(seat) ? ` (${getSeatTypeLabel(seat)})` : ''}`}
                             >
-                              <span className="text-xs md:text-sm font-medium">{seat.seat_number}</span>
+                              <span className="text-[10px] md:text-sm font-medium">{seat.seat_number}</span>
                               {getSeatTypeLabel(seat) && (
-                                <span className="absolute -top-2 -right-2 text-[8px] md:text-[10px] bg-blue-500 rounded-full px-1 text-white">
+                                <span className="absolute -top-1 -right-1 md:-top-2 md:-right-2 text-[6px] md:text-[10px] bg-blue-500 rounded-full px-0.5 md:px-1 text-white">
                                   {getSeatTypeLabel(seat)}
                                 </span>
                               )}
                               {seat.isBooked && (
-                                <span className="absolute inset-0 flex items-center justify-center text-white text-base md:text-lg">✕</span>
+                                <span className="absolute inset-0 flex items-center justify-center text-white text-xs md:text-lg">✕</span>
                               )}
                             </button>
                           ))}
@@ -280,49 +281,49 @@ export default function BookingPage() {
                 </div>
               )}
               
-              <div className="flex flex-wrap justify-center gap-6 mt-8 pt-6 border-t border-gray-700">
-                <div className="flex items-center gap-2"><div className="w-6 h-6 bg-gray-600 rounded" /><span className="text-sm text-gray-400">Свободно</span></div>
-                <div className="flex items-center gap-2"><div className="w-6 h-6 bg-green-500 rounded" /><span className="text-sm text-gray-400">Выбрано</span></div>
-                <div className="flex items-center gap-2"><div className="w-6 h-6 bg-red-800 rounded" /><span className="text-sm text-gray-400">Занято</span></div>
-                <div className="flex items-center gap-2"><div className="w-6 h-6 bg-purple-600 rounded" /><span className="text-sm text-gray-400">VIP</span></div>
-                <div className="flex items-center gap-2"><div className="w-6 h-6 bg-blue-600 rounded" /><span className="text-sm text-gray-400">Диван</span></div>
+              <div className="flex flex-wrap justify-center gap-3 md:gap-6 mt-6 md:mt-8 pt-4 md:pt-6 border-t border-gray-700">
+                <div className="flex items-center gap-1 md:gap-2"><div className="w-4 h-4 md:w-6 md:h-6 bg-gray-600 rounded" /><span className="text-[10px] md:text-sm text-gray-400">Свободно</span></div>
+                <div className="flex items-center gap-1 md:gap-2"><div className="w-4 h-4 md:w-6 md:h-6 bg-green-500 rounded" /><span className="text-[10px] md:text-sm text-gray-400">Выбрано</span></div>
+                <div className="flex items-center gap-1 md:gap-2"><div className="w-4 h-4 md:w-6 md:h-6 bg-red-800 rounded" /><span className="text-[10px] md:text-sm text-gray-400">Занято</span></div>
+                <div className="flex items-center gap-1 md:gap-2"><div className="w-4 h-4 md:w-6 md:h-6 bg-purple-600 rounded" /><span className="text-[10px] md:text-sm text-gray-400">VIP</span></div>
+                <div className="flex items-center gap-1 md:gap-2"><div className="w-4 h-4 md:w-6 md:h-6 bg-blue-600 rounded" /><span className="text-[10px] md:text-sm text-gray-400">Диван</span></div>
               </div>
             </div>
           </div>
           
           <div>
-            <div className="bg-gray-800 rounded-xl p-6 sticky top-24">
+            <div className="bg-gray-800 rounded-lg md:rounded-xl p-4 md:p-6 sticky top-20 md:top-24">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-white">Ваш заказ</h2>
+                <h2 className="text-lg md:text-xl font-bold text-white">Ваш заказ</h2>
                 {cart && cart.total_items > 0 && (
-                  <button onClick={() => setShowCart(!showCart)} className="text-blue-400 text-sm hover:text-blue-300">
+                  <button onClick={() => setShowCart(!showCart)} className="text-blue-400 text-xs md:text-sm hover:text-blue-300">
                     {showCart ? 'Скрыть' : 'Показать'}
                   </button>
                 )}
               </div>
               
               {!isAuthenticated ? (
-                <p className="text-gray-400 text-center py-8">Войдите в систему, чтобы выбирать места</p>
+                <p className="text-gray-400 text-center py-6 md:py-8 text-sm md:text-base">Войдите в систему, чтобы выбирать места</p>
               ) : !cart || cart.total_items === 0 ? (
-                <p className="text-gray-400 text-center py-8">Выберите места на схеме зала</p>
+                <p className="text-gray-400 text-center py-6 md:py-8 text-sm md:text-base">Выберите места на схеме зала</p>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-3 md:space-y-4">
                   {showCart && (
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                    <div className="space-y-2 max-h-60 md:max-h-80 overflow-y-auto">
                       {cart.bookings?.map((booking) => {
                         const seat = seats.find((s) => s.id === booking.seat);
                         return (
-                          <div key={booking.id} className="flex justify-between items-center p-3 bg-gray-700 rounded-lg">
+                          <div key={booking.id} className="flex justify-between items-center p-2 md:p-3 bg-gray-700 rounded-lg">
                             <div>
-                              <p className="font-medium text-white">Ряд {seat?.row_number}, Место {seat?.seat_number}</p>
-                              <p className="text-sm text-gray-400">{seat?.seat_type_detail?.display_name}</p>
+                              <p className="font-medium text-white text-xs md:text-sm">Ряд {seat?.row_number}, Место {seat?.seat_number}</p>
+                              <p className="text-[10px] md:text-xs text-gray-400">{seat?.seat_type_detail?.display_name}</p>
                             </div>
-                            <div className="flex items-center gap-4">
-                              <p className="font-bold text-blue-400">{booking.price} ₽</p>
+                            <div className="flex items-center gap-2 md:gap-4">
+                              <p className="font-bold text-blue-400 text-xs md:text-sm">{booking.price} ₽</p>
                               <button onClick={() => {
                                 const foundSeat = seats.find((s) => s.id === booking.seat);
                                 if (foundSeat) handleSeatClick(foundSeat);
-                              }} className="text-gray-400 hover:text-blue-400">🗑️</button>
+                              }} className="text-gray-400 hover:text-blue-400 text-xs md:text-sm">🗑️</button>
                             </div>
                           </div>
                         );
@@ -330,21 +331,21 @@ export default function BookingPage() {
                     </div>
                   )}
                   
-                  <div className="border-t border-gray-700 pt-4">
-                    <div className="flex justify-between mb-2"><span className="text-gray-400">Билеты:</span><span className="text-white">{cart.total_items} шт</span></div>
+                  <div className="border-t border-gray-700 pt-3 md:pt-4">
+                    <div className="flex justify-between mb-1 md:mb-2 text-sm md:text-base"><span className="text-gray-400">Билеты:</span><span className="text-white">{cart.total_items} шт</span></div>
                     {cart.is_discount && (
-                      <div className="flex justify-between mb-2 text-green-400">
+                      <div className="flex justify-between mb-1 md:mb-2 text-green-400 text-sm md:text-base">
                         <span>Скидка {cart.discount_percent}%:</span>
                         <span>- {Math.round(cart.total_price * cart.discount_percent / 100)} ₽</span>
                       </div>
                     )}
-                    <div className="flex justify-between text-xl font-bold">
+                    <div className="flex justify-between text-lg md:text-xl font-bold">
                       <span className="text-white">Итого:</span>
                       <span className="text-blue-500">{cart.total_price} ₽</span>
                     </div>
                   </div>
                   
-                  <button onClick={() => { if (cart.total_items > 0) navigate('/cart'); }} className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition">
+                  <button onClick={() => { if (cart.total_items > 0) navigate('/cart'); }} className="w-full py-2 md:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white text-sm md:text-base hover:opacity-90 transition">
                     {cart.total_items > 0 ? 'Перейти к оформлению →' : 'Выберите места'}
                   </button>
                 </div>

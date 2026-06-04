@@ -140,17 +140,17 @@ export default function CartPage() {
 
   if (!cart || cart.total_items === 0) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
-        <div className="container mx-auto px-6 text-center">
-          <div className="bg-gray-800 rounded-xl p-12 max-w-md mx-auto">
-            <svg className="w-16 h-16 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6" />
-</svg>
-            <h1 className="text-2xl font-bold text-white mb-4">Корзина пуста</h1>
-            <p className="text-gray-400 mb-6">Добавьте билеты из расписания</p>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12 md:py-20">
+        <div className="container mx-auto px-4 md:px-6 text-center">
+          <div className="bg-gray-800 rounded-lg md:rounded-xl p-6 md:p-12 max-w-md mx-auto">
+            <svg className="w-12 h-12 md:w-16 md:h-16 mx-auto mb-3 md:mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6" />
+            </svg>
+            <h1 className="text-xl md:text-2xl font-bold text-white mb-2 md:mb-4">Корзина пуста</h1>
+            <p className="text-gray-400 text-sm md:text-base mb-4 md:mb-6">Добавьте билеты из расписания</p>
             <Link
               to="/schedule"
-              className="inline-block px-6 py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition"
+              className="inline-block px-4 md:px-6 py-2 md:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white text-sm md:text-base hover:opacity-90 transition"
             >
               Выбрать билеты
             </Link>
@@ -178,34 +178,34 @@ export default function CartPage() {
   const total = cart.total_price;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12">
-      <div className="container mx-auto px-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-8 md:py-12">
+      <div className="container mx-auto px-4 md:px-6">
         {notification && (
-          <div className={`fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg ${
+          <div className={`fixed top-16 md:top-20 right-2 md:right-4 z-50 p-2 md:p-4 rounded-lg shadow-lg text-xs md:text-sm ${
             notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'
-          } text-white animate-fade-in`}>
+          } text-white animate-fade-in max-w-[200px] md:max-w-none`}>
             {notification.message}
           </div>
         )}
 
-        <h1 className="text-3xl font-bold text-white mb-8">Корзина</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-white mb-6 md:mb-8">Корзина</h1>
         
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8">
           <div className="lg:col-span-2">
-            <div className="bg-gray-800 rounded-xl p-6">
-              <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-white">Билеты ({cart.total_items} шт)</h2>
-                <button onClick={handleClearCart} className="text-blue-400 text-sm hover:text-blue-300 transition">
-                  Очистить корзину
+            <div className="bg-gray-800 rounded-lg md:rounded-xl p-4 md:p-6">
+              <div className="flex justify-between items-center mb-4 md:mb-6">
+                <h2 className="text-lg md:text-xl font-bold text-white">Билеты ({cart.total_items} шт)</h2>
+                <button onClick={handleClearCart} className="text-blue-400 text-xs md:text-sm hover:text-blue-300 transition">
+                  Очистить
                 </button>
               </div>
               
-              <div className="space-y-6">
+              <div className="space-y-4 md:space-y-6">
                 {Object.values(groupedBySession).map((group: any, idx: number) => (
-                  <div key={idx} className="border-b border-gray-700 pb-4 last:border-0">
-                    <div className="mb-3">
-                      <h3 className="text-lg font-semibold text-white">{group.film_name}</h3>
-                      <div className="text-sm text-gray-400 mt-1">
+                  <div key={idx} className="border-b border-gray-700 pb-3 md:pb-4 last:border-0">
+                    <div className="mb-2 md:mb-3">
+                      <h3 className="text-base md:text-lg font-semibold text-white">{group.film_name}</h3>
+                      <div className="text-xs md:text-sm text-gray-400 mt-0.5 md:mt-1">
                         {new Date(group.start_time).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} • 
                         {new Date(group.start_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} • 
                         {group.hall_name} • {group.screen_type}
@@ -214,19 +214,19 @@ export default function CartPage() {
                     
                     <div className="space-y-2">
                       {group.bookings.map((booking: Booking) => (
-                        <div key={booking.id} className="flex justify-between items-center p-3 bg-gray-700 rounded-lg">
+                        <div key={booking.id} className="flex justify-between items-center p-2 md:p-3 bg-gray-700 rounded-lg">
                           <div>
-                            <p className="font-medium text-white">
+                            <p className="font-medium text-white text-sm md:text-base">
                               Ряд {booking.seat_detail.row_number}, Место {booking.seat_detail.seat_number}
                             </p>
-                            <p className="text-sm text-gray-400">
+                            <p className="text-xs md:text-sm text-gray-400">
                               {booking.seat_detail.seat_type_detail?.display_name || 'Обычное'}
                             </p>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <p className="font-bold text-blue-400">{booking.price} ₽</p>
+                          <div className="flex items-center gap-2 md:gap-4">
+                            <p className="font-bold text-blue-400 text-sm md:text-base">{booking.price} ₽</p>
                             <button onClick={() => handleRemoveItem(booking.id)} className="text-gray-400 hover:text-blue-400 transition">
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                               </svg>
                             </button>
@@ -241,26 +241,26 @@ export default function CartPage() {
           </div>
           
           <div>
-            <div className="bg-gray-800 rounded-xl p-6 sticky top-24">
-              <h2 className="text-xl font-bold text-white mb-4">Итого</h2>
+            <div className="bg-gray-800 rounded-lg md:rounded-xl p-4 md:p-6 sticky top-20 md:top-24">
+              <h2 className="text-lg md:text-xl font-bold text-white mb-4">Итого</h2>
               
-              <div className="space-y-3 mb-6">
-                <div className="flex justify-between">
+              <div className="space-y-2 md:space-y-3 mb-4 md:mb-6">
+                <div className="flex justify-between text-sm md:text-base">
                   <span className="text-gray-400">Сумма:</span>
                   <span className="text-white">{total} ₽</span>
                 </div>
-                <div className="border-t border-gray-700 pt-3">
-                  <div className="flex justify-between text-xl font-bold">
+                <div className="border-t border-gray-700 pt-2 md:pt-3">
+                  <div className="flex justify-between text-lg md:text-xl font-bold">
                     <span className="text-white">Итого:</span>
                     <span className="text-blue-500">{Math.round(total)} ₽</span>
                   </div>
                 </div>
               </div>
               
-              <div className="mb-6">
+              <div className="mb-4 md:mb-6">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input type="checkbox" className="w-4 h-4" defaultChecked />
-                  <span className="text-sm text-gray-300">
+                  <input type="checkbox" className="w-3 h-3 md:w-4 md:h-4" defaultChecked />
+                  <span className="text-xs md:text-sm text-gray-300">
                     Отправить билеты на email: {cart.send_to_email}
                   </span>
                 </label>
@@ -269,12 +269,12 @@ export default function CartPage() {
               <button
                 onClick={handleCheckout}
                 disabled={creatingPayment}
-                className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
+                className="w-full py-2 md:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white text-sm md:text-base hover:opacity-90 transition disabled:opacity-50"
               >
                 {creatingPayment ? 'Создание платежа...' : 'Перейти к оплате →'}
               </button>
               
-              <p className="text-xs text-gray-500 text-center mt-4">
+              <p className="text-[10px] md:text-xs text-gray-500 text-center mt-3 md:mt-4">
                 Время бронирования: до {new Date(cart.expires_at).toLocaleTimeString()}
               </p>
             </div>

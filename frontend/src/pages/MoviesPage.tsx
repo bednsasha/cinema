@@ -38,29 +38,29 @@ const MoviesPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
-      <div className="container mx-auto px-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-8 md:py-20">
+      <div className="container mx-auto px-4 md:px-6">
         <motion.div
-          className="movies-header text-center mb-12"
+          className="movies-header text-center mb-8 md:mb-12"
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="text-5xl font-bold mb-4 bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-5xl font-bold mb-2 md:mb-4 bg-gradient-to-r from-blue-500 to-indigo-600 bg-clip-text text-transparent">
             Все фильмы
           </h1>
-          <p className="text-gray-400 text-lg">Выберите фильм для просмотра</p>
+          <p className="text-gray-400 text-sm md:text-lg">Выберите фильм для просмотра</p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-8">
           {movies.map((movie, index) => (
             <MovieCard key={movie.id} movie={movie} index={index} />
           ))}
         </div>
 
         {movies.length === 0 && (
-          <div className="text-center py-20">
-            <p className="text-gray-400 text-xl">Фильмы не найдены</p>
+          <div className="text-center py-12 md:py-20">
+            <p className="text-gray-400 text-sm md:text-xl">Фильмы не найдены</p>
           </div>
         )}
       </div>

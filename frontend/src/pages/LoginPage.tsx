@@ -42,46 +42,46 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center py-12 px-6">
-      <div className="max-w-md w-full bg-gray-800 rounded-xl p-8 shadow-xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Вход в систему</h1>
-          <p className="text-gray-400">Войдите, чтобы купить билеты</p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black flex items-center justify-center py-8 md:py-12 px-4 md:px-6">
+      <div className="max-w-md w-full bg-gray-800 rounded-lg md:rounded-xl p-6 md:p-8 shadow-xl">
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-white mb-2">Вход в систему</h1>
+          <p className="text-gray-400 text-sm md:text-base">Войдите, чтобы купить билеты</p>
         </div>
 
         {error && (
-          <div className="bg-red-900/50 border border-red-600 rounded-lg p-3 mb-6">
-            <p className="text-red-400 text-sm">{error}</p>
+          <div className="bg-red-900/50 border border-red-600 rounded-lg p-2 md:p-3 mb-4 md:mb-6">
+            <p className="text-red-400 text-xs md:text-sm">{error}</p>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4 md:space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Email</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1 md:mb-2">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+              className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm md:text-base"
               placeholder="example@mail.com"
               required
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-2">Пароль</label>
+            <label className="block text-sm font-medium text-gray-300 mb-1 md:mb-2">Пароль</label>
             <input
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
+              className="w-full px-3 md:px-4 py-2 md:py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white text-sm md:text-base"
               placeholder="Введите пароль"
               required
             />
           </div>
 
           <div className="text-right">
-            <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300 transition">
+            <Link to="/forgot-password" className="text-xs md:text-sm text-blue-400 hover:text-blue-300 transition">
               Забыли пароль?
             </Link>
           </div>
@@ -89,14 +89,14 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition disabled:opacity-50"
+            className="w-full py-2 md:py-3 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white text-sm md:text-base hover:opacity-90 transition disabled:opacity-50"
           >
             {loading ? 'Вход...' : 'Войти'}
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-gray-400 text-sm">
+        <div className="mt-4 md:mt-6 text-center">
+          <p className="text-gray-400 text-xs md:text-sm">
             Нет аккаунта?{' '}
             <Link to="/register" className="text-blue-400 hover:text-blue-300">
               Зарегистрироваться

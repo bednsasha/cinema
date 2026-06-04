@@ -32,7 +32,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
     : 'https://via.placeholder.com/300x400/1a1a1a/ffffff?text=No+Poster';
 
   const genresList = movie.genres || [];
-  const displayGenres = genresList.slice(0, 3).map((genre: any, idx: number) => 
+  const displayGenres = genresList.slice(0, 2).map((genre: any, idx: number) => 
     typeof genre === 'string' ? genre : genre.name
   );
 
@@ -41,12 +41,12 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
   return (
     <motion.div
       ref={cardRef}
-      whileHover={{ y: -10, scale: 1.02 }}
+      whileHover={{ y: -5, scale: 1.02 }}
       transition={{ duration: 0.3 }}
-      className="group relative bg-gray-800 rounded-xl overflow-hidden shadow-xl cursor-pointer"
+      className="group relative bg-gray-800 rounded-lg md:rounded-xl overflow-hidden shadow-xl cursor-pointer"
     >
       <Link to={`/movie/${movie.id}`}>
-        <div className="relative overflow-hidden h-80">
+        <div className="relative overflow-hidden h-48 md:h-80">
           <img
             src={posterUrl}
             alt={movie.name}
@@ -57,50 +57,48 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
           />
           
           {movie.rating && (
-            <div className="absolute top-4 right-4 bg-yellow-500 text-black px-2 py-1 rounded-full font-bold text-sm">
+            <div className="absolute top-2 right-2 md:top-4 md:right-4 bg-yellow-500 text-black px-1.5 py-0.5 md:px-2 md:py-1 rounded-full text-[10px] md:text-sm font-bold">
               ★ {movie.rating}
             </div>
           )}
           
-          <div className="absolute top-4 left-4 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-bold">
+          <div className="absolute top-2 left-2 md:top-4 md:left-4 bg-blue-600 text-white px-1.5 py-0.5 md:px-2 md:py-1 rounded-full text-[8px] md:text-xs font-bold">
             {movie.age_limit_display || movie.age_limit || '0+'}
           </div>
         </div>
 
-        <div className="p-5">
-          <h3 className="text-xl font-bold text-white mb-2 line-clamp-1 group-hover:text-blue-400 transition-colors">
+        <div className="p-2 md:p-5">
+          <h3 className="text-sm md:text-xl font-bold text-white mb-1 md:mb-2 line-clamp-1 group-hover:text-blue-400 transition-colors">
             {movie.name}
           </h3>
           
-          <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
+          <div className="flex items-center gap-1 md:gap-2 text-gray-400 text-[10px] md:text-sm mb-1 md:mb-3">
             <span>{movie.duration} мин</span>
             <span>•</span>
             <span>{movie.release_year || '2024'}</span>
-            <span>•</span>
-            <span>{movie.country || 'Россия'}</span>
           </div>
           
-          <div className="flex flex-wrap gap-1 mb-3">
+          <div className="flex flex-wrap gap-0.5 md:gap-1 mb-1 md:mb-3">
             {displayGenres.length > 0 ? (
               displayGenres.map((genre: string, idx: number) => (
-                <span key={idx} className="text-xs px-2 py-1 bg-gray-700 rounded-full text-gray-300">
+                <span key={idx} className="text-[8px] md:text-xs px-1 md:px-2 py-0.5 md:py-1 bg-gray-700 rounded-full text-gray-300">
                   {genre}
                 </span>
               ))
             ) : (
-              <span className="text-xs px-2 py-1 bg-gray-700 rounded-full text-gray-300">
+              <span className="text-[8px] md:text-xs px-1 md:px-2 py-0.5 md:py-1 bg-gray-700 rounded-full text-gray-300">
                 Без жанра
               </span>
             )}
           </div>
           
-          <p className="text-gray-400 text-sm line-clamp-2">
+          <p className="text-gray-400 text-[10px] md:text-sm line-clamp-2 hidden md:block">
             {description}
           </p>
         </div>
         
-        <div className="p-5 pt-0">
-          <button className="w-full py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white hover:opacity-90 transition-opacity">
+        <div className="p-2 md:p-5 pt-0">
+          <button className="w-full py-1 md:py-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-lg font-semibold text-white text-xs md:text-base hover:opacity-90 transition-opacity">
             Купить билет
           </button>
         </div>

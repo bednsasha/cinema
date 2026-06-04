@@ -121,17 +121,16 @@ const Navbar: React.FC = () => {
             </div>
             
             <div className="flex items-center gap-3 md:gap-4">
-
-<Link to="/cart" className="relative text-gray-300 hover:text-white transition">
-  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-  </svg>
-  {cartItemsCount > 0 && (
-    <span className="absolute -top-2 -right-3 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-      {cartItemsCount}
-    </span>
-  )}
-</Link>
+              <Link to="/cart" className="relative text-gray-300 hover:text-white transition">
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+                </svg>
+                {cartItemsCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {cartItemsCount}
+                  </span>
+                )}
+              </Link>
               
               <div className="hidden md:block">
                 {isAuthenticated ? (
@@ -241,7 +240,7 @@ const Navbar: React.FC = () => {
                     className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-300 hover:bg-gray-800 transition"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6M9 21h6M12 15v6" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
                     </svg>
                     <span className="font-medium">Корзина</span>
                     {cartItemsCount > 0 && (

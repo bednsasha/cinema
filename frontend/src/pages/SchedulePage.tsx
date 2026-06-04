@@ -71,27 +71,27 @@ export default function SchedulePage() {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-8">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">Расписание сеансов</h1>
-          <div className="w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-6 md:py-8">
+      <div className="container mx-auto px-3 md:px-4">
+        <div className="text-center mb-6 md:mb-8">
+          <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Расписание сеансов</h1>
+          <div className="w-16 md:w-20 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
         </div>
 
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex justify-between items-center mb-4 md:mb-6">
           <button
             onClick={() => {
               const newDate = new Date(selectedDate);
               newDate.setDate(selectedDate.getDate() - 7);
               setSelectedDate(newDate);
             }}
-            className="px-3 py-1.5 text-sm bg-gray-800 rounded-lg hover:bg-gray-700 transition"
+            className="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm bg-gray-800 rounded-lg hover:bg-gray-700 transition"
           >
             ← Предыдущая
           </button>
           <button
             onClick={() => setSelectedDate(new Date())}
-            className="px-3 py-1.5 text-sm bg-blue-600 rounded-lg hover:bg-blue-700 transition"
+            className="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm bg-blue-600 rounded-lg hover:bg-blue-700 transition"
           >
             Сегодня
           </button>
@@ -101,13 +101,13 @@ export default function SchedulePage() {
               newDate.setDate(selectedDate.getDate() + 7);
               setSelectedDate(newDate);
             }}
-            className="px-3 py-1.5 text-sm bg-gray-800 rounded-lg hover:bg-gray-700 transition"
+            className="px-2 md:px-3 py-1 md:py-1.5 text-xs md:text-sm bg-gray-800 rounded-lg hover:bg-gray-700 transition"
           >
             Следующая →
           </button>
         </div>
 
-        <div className="grid grid-cols-7 gap-2 mb-6">
+        <div className="grid grid-cols-7 gap-1 md:gap-2 mb-4 md:mb-6">
           {weekDates.map((date, index) => {
             const dateStr = date.toISOString().split('T')[0];
             const isToday = dateStr === today;
@@ -117,7 +117,7 @@ export default function SchedulePage() {
               <button
                 key={index}
                 onClick={() => setSelectedDate(date)}
-                className={`text-center p-2 rounded-lg transition ${
+                className={`text-center p-1 md:p-2 rounded-lg transition ${
                   isSelected 
                     ? 'bg-gradient-to-r from-blue-500 to-indigo-600 text-white' 
                     : isToday 
@@ -125,10 +125,10 @@ export default function SchedulePage() {
                       : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
                 }`}
               >
-                <div className="text-xs">
+                <div className="text-[10px] md:text-xs">
                   {date.toLocaleDateString('ru-RU', { weekday: 'short' })}
                 </div>
-                <div className={`text-lg font-bold ${isSelected ? 'text-white' : isToday ? 'text-blue-400' : 'text-gray-200'}`}>
+                <div className={`text-sm md:text-lg font-bold ${isSelected ? 'text-white' : isToday ? 'text-blue-400' : 'text-gray-200'}`}>
                   {date.getDate()}
                 </div>
               </button>
@@ -136,49 +136,49 @@ export default function SchedulePage() {
           })}
         </div>
 
-        <div className="mb-4">
-          <h2 className="text-xl font-bold text-white">{formattedDate}</h2>
+        <div className="mb-3 md:mb-4">
+          <h2 className="text-lg md:text-xl font-bold text-white">{formattedDate}</h2>
         </div>
 
         {loading ? (
-          <div className="flex justify-center items-center py-12">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
+          <div className="flex justify-center items-center py-8 md:py-12">
+            <div className="animate-spin rounded-full h-8 md:h-12 w-8 md:w-12 border-t-4 border-b-4 border-blue-500"></div>
           </div>
         ) : Object.keys(groupedSessions).length === 0 ? (
-          <div className="bg-gray-800 rounded-xl p-8 text-center">
-            <p className="text-gray-400">Нет сеансов на выбранную дату</p>
+          <div className="bg-gray-800 rounded-lg md:rounded-xl p-6 md:p-8 text-center">
+            <p className="text-gray-400 text-sm md:text-base">Нет сеансов на выбранную дату</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3 md:space-y-4">
             {Object.entries(groupedSessions).map(([filmName, { film, sessions: filmSessions }]) => (
-              <div key={filmName} className="bg-gray-800 rounded-lg p-4">
-                <div className="flex items-start gap-4 mb-3">
+              <div key={filmName} className="bg-gray-800 rounded-lg p-3 md:p-4">
+                <div className="flex items-start gap-3 md:gap-4 mb-2 md:mb-3">
                   {film?.poster && (
                     <img 
                       src={film.poster.startsWith('http') ? film.poster : `http://127.0.0.1:8000${film.poster}`}
                       alt={filmName}
-                      className="w-16 h-24 object-cover rounded-md"
+                      className="w-12 h-16 md:w-16 md:h-24 object-cover rounded-md"
                     />
                   )}
-                  <div>
-                    <Link to={`/movie/${film?.id}`} className="text-lg font-semibold text-white hover:text-blue-400 transition">
+                  <div className="flex-1 min-w-0">
+                    <Link to={`/movie/${film?.id}`} className="text-base md:text-lg font-semibold text-white hover:text-blue-400 transition break-words">
                       {filmName}
                     </Link>
-                    <div className="flex gap-2 mt-1">
+                    <div className="flex flex-wrap gap-1 md:gap-2 mt-1">
                       {film?.age_limit_display && (
-                        <span className="text-xs bg-gray-700 px-1.5 py-0.5 rounded text-blue-400">{film.age_limit_display}</span>
+                        <span className="text-[10px] md:text-xs bg-gray-700 px-1 md:px-1.5 py-0.5 rounded text-blue-400">{film.age_limit_display}</span>
                       )}
                       {film?.duration && (
-                        <span className="text-xs text-gray-400">{film.duration} мин</span>
+                        <span className="text-[10px] md:text-xs text-gray-400">{film.duration} мин</span>
                       )}
                       {film?.rating && (
-                        <span className="text-xs text-yellow-500">★ {film.rating}</span>
+                        <span className="text-[10px] md:text-xs text-yellow-500">★ {film.rating}</span>
                       )}
                     </div>
                   </div>
                 </div>
                 
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1 md:gap-2">
                   {filmSessions.map((session) => {
                     const sessionDate = new Date(session.start_time);
                     const now = new Date();
@@ -194,26 +194,23 @@ export default function SchedulePage() {
                             alert('Этот сеанс уже завершен');
                           }
                         }}
-                        className={`px-2 py-1 rounded-md text-center min-w-[70px] transition ${
+                        className={`px-1.5 md:px-2 py-0.5 md:py-1 rounded-md text-center transition ${
                           isPast
                             ? 'bg-gray-800 opacity-50 cursor-not-allowed'
                             : 'bg-gray-700 hover:bg-blue-600'
                         }`}
                       >
-                        <div className={`text-sm font-medium ${isPast ? 'text-gray-500' : 'text-white'}`}>
+                        <div className={`text-xs md:text-sm font-medium ${isPast ? 'text-gray-500' : 'text-white'}`}>
                           {new Date(session.start_time).toLocaleTimeString('ru-RU', {
                             hour: '2-digit',
                             minute: '2-digit'
                           })}
                         </div>
-                        <div className={`text-[10px] ${isPast ? 'text-gray-600' : 'text-gray-400'}`}>
+                        <div className={`text-[8px] md:text-[10px] ${isPast ? 'text-gray-600' : 'text-gray-400'}`}>
                           {session.hall_name}
                         </div>
-                        <div className={`text-[10px] ${isPast ? 'text-gray-600' : 'text-gray-500'}`}>
-                          {session.screen_type_name?.slice(0, 3)}
-                        </div>
                         {isPast && (
-                          <div className="text-[9px] text-gray-500">Завершен</div>
+                          <div className="text-[8px] text-gray-500">Завершен</div>
                         )}
                       </Link>
                     );
