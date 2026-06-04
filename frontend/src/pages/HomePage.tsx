@@ -125,7 +125,7 @@ export default function HomePage() {
                         </span>
                       ))}
                     </div>
-                    <p className="text-gray-400 text-[10px] md:text-sm line-clamp-2 hidden md:block">
+                    <p className="text-gray-400 text-[10px] md:text-sm line-clamp-2">
                       {movie.description || 'Описание отсутствует'}
                     </p>
                   </div>

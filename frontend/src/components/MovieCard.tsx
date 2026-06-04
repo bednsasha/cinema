@@ -92,7 +92,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie, index }) => {
             )}
           </div>
           
-          <p className="text-gray-400 text-[10px] md:text-sm line-clamp-2 hidden md:block">
+          <p className="text-gray-400 text-[10px] md:text-sm line-clamp-2">
             {description}
           </p>
         </div>
