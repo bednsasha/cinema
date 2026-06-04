@@ -1,4 +1,3 @@
-// src/pages/HomePage.tsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { movieAPI, sessionAPI } from '../services/api';
@@ -11,7 +10,6 @@ export default function HomePage() {
   const [loadingSessions, setLoadingSessions] = useState(true);
 
   useEffect(() => {
-    // Загружаем фильмы
     movieAPI.getNowShowing()
       .then(response => {
         setMovies(response.data);
@@ -22,10 +20,8 @@ export default function HomePage() {
         setLoading(false);
       });
     
-    // Загружаем сеансы на сегодня
     sessionAPI.getTodaySessions()
       .then(response => {
-        // Фильтруем только будущие сеансы
         const now = new Date();
         const futureSessions = response.data.filter(session => {
           const sessionDate = new Date(session.start_time);
@@ -40,7 +36,6 @@ export default function HomePage() {
       });
   }, []);
 
-  // Группируем сеансы по фильмам
   const groupedTodaySessions = todaySessions.reduce((acc, session) => {
     if (!acc[session.film_name]) {
       acc[session.film_name] = [];
@@ -49,7 +44,6 @@ export default function HomePage() {
     return acc;
   }, {} as Record<string, Session[]>);
 
-  // Функция проверки, завершен ли сеанс
   const isSessionPast = (session: Session) => {
     const sessionDate = new Date(session.start_time);
     const now = new Date();
@@ -66,7 +60,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Hero секция */}
       <div className="relative h-[400px] bg-cover bg-center" style={{
         backgroundImage: 'url("https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?ixlib=rb-4.0.3")',
       }}>
@@ -81,7 +74,6 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Секция фильмов */}
       <div className="container mx-auto px-6 py-16">
         <div className="text-center mb-12">
           <h2 className="text-4xl font-bold text-white mb-2">Сейчас в прокате</h2>
@@ -100,7 +92,7 @@ export default function HomePage() {
                   <div className="relative h-80">
                     {movie.poster ? (
                       <img 
-                        src={movie.poster}
+                        src={movie.poster.startsWith('http') ? movie.poster : `http://127.0.0.1:8000${movie.poster}`}
                         alt={movie.name}
                         className="w-full h-full object-cover"
                       />
@@ -115,7 +107,7 @@ export default function HomePage() {
                       </div>
                     )}
                     <div className="absolute top-4 left-4 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-bold">
-                      {movie.age_limit_display}
+                      {movie.age_limit_display || movie.age_limit || '0+'}
                     </div>
                   </div>
                   
@@ -124,9 +116,9 @@ export default function HomePage() {
                     <div className="flex items-center gap-2 text-gray-400 text-sm mb-3">
                       <span>{movie.duration} мин</span>
                       <span>•</span>
-                      <span>{movie.release_year}</span>
+                      <span>{movie.release_year || '2024'}</span>
                       <span>•</span>
-                      <span>{movie.country}</span>
+                      <span>{movie.country || 'Россия'}</span>
                     </div>
                     <div className="flex flex-wrap gap-1 mb-3">
                       {movie.genres?.slice(0, 3).map((genre) => (
@@ -136,7 +128,7 @@ export default function HomePage() {
                       ))}
                     </div>
                     <p className="text-gray-400 text-sm line-clamp-2">
-                      {movie.description}
+                      {movie.description || 'Описание отсутствует'}
                     </p>
                   </div>
                   
@@ -151,7 +143,6 @@ export default function HomePage() {
           </div>
         )}
 
-        {/* Ближайшие сеансы на сегодня */}
         <div className="bg-gradient-to-r from-gray-800 to-gray-900 rounded-2xl p-8 mt-16">
           <div className="flex justify-between items-center mb-6">
             <div>

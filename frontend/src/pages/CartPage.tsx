@@ -1,4 +1,3 @@
-// src/pages/CartPage.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { cartAPI, authAPI } from '../services/api';
@@ -48,17 +47,21 @@ export default function CartPage() {
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [creatingPayment, setCreatingPayment] = useState(false);
+  const [notification, setNotification] = useState<{ message: string; type: string } | null>(null);
 
   useEffect(() => {
-    // Проверяем авторизацию
     if (!authAPI.isAuthenticated()) {
       localStorage.setItem('redirectAfterLogin', '/cart');
       navigate('/login');
       return;
     }
-    
     loadCart();
   }, []);
+
+  const showNotification = (message: string, type: 'success' | 'error' = 'error') => {
+    setNotification({ message, type });
+    setTimeout(() => setNotification(null), 3000);
+  };
 
   const loadCart = async () => {
     try {
@@ -76,11 +79,10 @@ export default function CartPage() {
     try {
       await cartAPI.removeFromCart(bookingId);
       await loadCart();
-      // Обновляем счетчик в навбаре
       window.dispatchEvent(new Event('cartUpdated'));
+      showNotification('Место удалено из корзины', 'success');
     } catch (error) {
-      console.error('Error removing item:', error);
-      alert('Не удалось удалить место');
+      showNotification('Не удалось удалить место', 'error');
     }
   };
 
@@ -89,11 +91,10 @@ export default function CartPage() {
       try {
         await cartAPI.clearCart();
         await loadCart();
-        // Обновляем счетчик в навбаре
         window.dispatchEvent(new Event('cartUpdated'));
+        showNotification('Корзина очищена', 'success');
       } catch (error) {
-        console.error('Error clearing cart:', error);
-        alert('Не удалось очистить корзину');
+        showNotification('Не удалось очистить корзину', 'error');
       }
     }
   };
@@ -120,11 +121,10 @@ export default function CartPage() {
         localStorage.setItem('last_payment_id', data.payment_id);
         window.location.href = data.payment_url;
       } else {
-        alert(data.error || 'Ошибка создания платежа');
+        showNotification(data.error || 'Ошибка создания платежа', 'error');
       }
     } catch (error) {
-      console.error('Payment error:', error);
-      alert('Ошибка при создании платежа');
+      showNotification('Ошибка при создании платежа', 'error');
     } finally {
       setCreatingPayment(false);
     }
@@ -143,7 +143,9 @@ export default function CartPage() {
       <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
         <div className="container mx-auto px-6 text-center">
           <div className="bg-gray-800 rounded-xl p-12 max-w-md mx-auto">
-            <div className="text-6xl mb-4">🛒</div>
+            <svg className="w-16 h-16 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-1.5 6M17 13l1.5 6" />
+</svg>
             <h1 className="text-2xl font-bold text-white mb-4">Корзина пуста</h1>
             <p className="text-gray-400 mb-6">Добавьте билеты из расписания</p>
             <Link
@@ -158,7 +160,6 @@ export default function CartPage() {
     );
   }
 
-  // Группируем билеты по сеансам
   const groupedBySession = cart.bookings.reduce((acc, booking) => {
     const sessionKey = booking.session_detail.film_name;
     if (!acc[sessionKey]) {
@@ -174,26 +175,27 @@ export default function CartPage() {
     return acc;
   }, {} as Record<string, any>);
 
-  const subtotal = cart.total_price;
-  const total = subtotal;
+  const total = cart.total_price;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12">
       <div className="container mx-auto px-6">
+        {notification && (
+          <div className={`fixed top-20 right-4 z-50 p-4 rounded-lg shadow-lg ${
+            notification.type === 'success' ? 'bg-green-600' : 'bg-red-600'
+          } text-white animate-fade-in`}>
+            {notification.message}
+          </div>
+        )}
+
         <h1 className="text-3xl font-bold text-white mb-8">Корзина</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Список билетов */}
           <div className="lg:col-span-2">
             <div className="bg-gray-800 rounded-xl p-6">
               <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-bold text-white">
-                  Билеты ({cart.total_items} шт)
-                </h2>
-                <button
-                  onClick={handleClearCart}
-                  className="text-blue-400 text-sm hover:text-blue-300 transition"
-                >
+                <h2 className="text-xl font-bold text-white">Билеты ({cart.total_items} шт)</h2>
+                <button onClick={handleClearCart} className="text-blue-400 text-sm hover:text-blue-300 transition">
                   Очистить корзину
                 </button>
               </div>
@@ -204,12 +206,8 @@ export default function CartPage() {
                     <div className="mb-3">
                       <h3 className="text-lg font-semibold text-white">{group.film_name}</h3>
                       <div className="text-sm text-gray-400 mt-1">
-                        {new Date(group.start_time).toLocaleDateString('ru-RU', {
-                          day: 'numeric', month: 'long'
-                        })} • 
-                        {new Date(group.start_time).toLocaleTimeString('ru-RU', {
-                          hour: '2-digit', minute: '2-digit'
-                        })} • 
+                        {new Date(group.start_time).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long' })} • 
+                        {new Date(group.start_time).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })} • 
                         {group.hall_name} • {group.screen_type}
                       </div>
                     </div>
@@ -227,11 +225,10 @@ export default function CartPage() {
                           </div>
                           <div className="flex items-center gap-4">
                             <p className="font-bold text-blue-400">{booking.price} ₽</p>
-                            <button
-                              onClick={() => handleRemoveItem(booking.id)}
-                              className="text-gray-400 hover:text-blue-400 transition"
-                            >
-                              🗑️
+                            <button onClick={() => handleRemoveItem(booking.id)} className="text-gray-400 hover:text-blue-400 transition">
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
                             </button>
                           </div>
                         </div>
@@ -243,7 +240,6 @@ export default function CartPage() {
             </div>
           </div>
           
-          {/* Итоговая информация */}
           <div>
             <div className="bg-gray-800 rounded-xl p-6 sticky top-24">
               <h2 className="text-xl font-bold text-white mb-4">Итого</h2>
@@ -251,9 +247,8 @@ export default function CartPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between">
                   <span className="text-gray-400">Сумма:</span>
-                  <span className="text-white">{subtotal} ₽</span>
+                  <span className="text-white">{total} ₽</span>
                 </div>
-                
                 <div className="border-t border-gray-700 pt-3">
                   <div className="flex justify-between text-xl font-bold">
                     <span className="text-white">Итого:</span>
@@ -262,21 +257,15 @@ export default function CartPage() {
                 </div>
               </div>
               
-              {/* Информация о рассылке */}
               <div className="mb-6">
                 <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    className="w-4 h-4"
-                    defaultChecked
-                  />
+                  <input type="checkbox" className="w-4 h-4" defaultChecked />
                   <span className="text-sm text-gray-300">
                     Отправить билеты на email: {cart.send_to_email}
                   </span>
                 </label>
               </div>
               
-              {/* Кнопка оплаты */}
               <button
                 onClick={handleCheckout}
                 disabled={creatingPayment}

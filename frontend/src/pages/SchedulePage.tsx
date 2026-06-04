@@ -1,4 +1,3 @@
-// src/pages/SchedulePage.tsx
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { sessionAPI, movieAPI } from '../services/api';
@@ -108,7 +107,6 @@ export default function SchedulePage() {
           </button>
         </div>
 
-        {/* Календарь */}
         <div className="grid grid-cols-7 gap-2 mb-6">
           {weekDates.map((date, index) => {
             const dateStr = date.toISOString().split('T')[0];
@@ -138,12 +136,10 @@ export default function SchedulePage() {
           })}
         </div>
 
-        {/* Выбранная дата */}
         <div className="mb-4">
           <h2 className="text-xl font-bold text-white">{formattedDate}</h2>
         </div>
 
-        {/* Сеансы */}
         {loading ? (
           <div className="flex justify-center items-center py-12">
             <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-500"></div>
@@ -182,7 +178,6 @@ export default function SchedulePage() {
                   </div>
                 </div>
                 
-                {/* Время сеансов */}
                 <div className="flex flex-wrap gap-2">
                   {filmSessions.map((session) => {
                     const sessionDate = new Date(session.start_time);

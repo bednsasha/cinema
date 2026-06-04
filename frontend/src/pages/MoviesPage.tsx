@@ -16,10 +16,8 @@ const MoviesPage: React.FC = () => {
   const fetchMovies = async () => {
     try {
       const response = await movieAPI.getAll();
-      console.log('Fetched movies:', response.data);
       setMovies(response.data);
       
-      // Анимация заголовка
       gsap.fromTo('.movies-header',
         { y: -50, opacity: 0 },
         { y: 0, opacity: 1, duration: 0.8, ease: 'power3.out' }
@@ -34,15 +32,14 @@ const MoviesPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-96">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen py-20">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
       <div className="container mx-auto px-6">
-        {/* Header */}
         <motion.div
           className="movies-header text-center mb-12"
           initial={{ opacity: 0, y: -30 }}
@@ -55,7 +52,6 @@ const MoviesPage: React.FC = () => {
           <p className="text-gray-400 text-lg">Выберите фильм для просмотра</p>
         </motion.div>
 
-        {/* Movies Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
           {movies.map((movie, index) => (
             <MovieCard key={movie.id} movie={movie} index={index} />

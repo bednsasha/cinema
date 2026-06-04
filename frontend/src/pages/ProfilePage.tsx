@@ -1,8 +1,6 @@
-// src/pages/ProfilePage.tsx
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { authAPI } from '../services/api';
-
 import QRCode from 'react-qr-code';
 
 const API_URL = 'http://127.0.0.1:8000/api';
@@ -64,9 +62,7 @@ export default function ProfilePage() {
     try {
       const token = localStorage.getItem('access_token');
       const response = await fetch(`${API_URL}/payment/my-tickets/`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+        headers: { 'Authorization': `Bearer ${token}` }
       });
       const data = await response.json();
       
@@ -92,7 +88,6 @@ export default function ProfilePage() {
     navigate('/login');
   };
 
-  // Формируем данные для QR-кода
   const getQRData = (ticket: Ticket) => {
     return JSON.stringify({
       ticket_id: ticket.id,
@@ -116,7 +111,6 @@ export default function ProfilePage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-12">
       <div className="container mx-auto px-6 max-w-4xl">
-        {/* Профиль пользователя */}
         <div className="bg-gray-800 rounded-xl p-6 mb-8">
           <div className="flex justify-between items-start">
             <div>
@@ -135,7 +129,6 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* Табы */}
         <div className="flex gap-4 mb-6 border-b border-gray-700">
           <button
             onClick={() => setActiveTab('active')}
@@ -159,11 +152,12 @@ export default function ProfilePage() {
           </button>
         </div>
 
-        {/* Активные билеты */}
         {activeTab === 'active' && (
           activeTickets.length === 0 ? (
             <div className="bg-gray-800 rounded-xl p-12 text-center">
-              <div className="text-6xl mb-4">🎫</div>
+              <svg className="w-16 h-16 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 5v2m0 4v2m0 4v2M5 5h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
+              </svg>
               <p className="text-gray-400 text-lg">У вас нет активных билетов</p>
               <button
                 onClick={() => navigate('/schedule')}
@@ -180,30 +174,47 @@ export default function ProfilePage() {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <h3 className="text-xl font-bold text-white">{ticket.film_name}</h3>
-                        <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">
-                          Активен
-                        </span>
+                        <span className="bg-green-600 text-white text-xs px-2 py-1 rounded-full">Активен</span>
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-400">
-                        <p>📅 {new Date(ticket.session_time).toLocaleDateString('ru-RU', {
-                          day: 'numeric', month: 'long', year: 'numeric'
-                        })}</p>
-                        <p>⏰ {new Date(ticket.session_time).toLocaleTimeString('ru-RU', {
-                          hour: '2-digit', minute: '2-digit'
-                        })}</p>
-                        <p>🏠 {ticket.hall_name}</p>
-                        <p>💺 Ряд {ticket.row_number}, Место {ticket.seat_number}</p>
-                        <p className="text-yellow-500 font-semibold">💰 {Number(ticket.price).toFixed(2)} ₽</p>
+                        <p className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          {new Date(ticket.session_time).toLocaleDateString('ru-RU', {
+                            day: 'numeric', month: 'long', year: 'numeric'
+                          })}
+                        </p>
+                        <p className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          {new Date(ticket.session_time).toLocaleTimeString('ru-RU', {
+                            hour: '2-digit', minute: '2-digit'
+                          })}
+                        </p>
+                        <p className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                          </svg>
+                          {ticket.hall_name}
+                        </p>
+                        <p className="flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                          </svg>
+                          Ряд {ticket.row_number}, Место {ticket.seat_number}
+                        </p>
+                        <p className="text-yellow-500 font-semibold flex items-center gap-1">
+                          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10 0a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" />
+                          </svg>
+                          {Number(ticket.price).toFixed(2)} ₽
+                        </p>
                       </div>
                     </div>
                     <div className="text-center">
-                      <QRCode 
-                        value={getQRData(ticket)}
-                        size={96}
-                        bgColor="#ffffff"
-                        fgColor="#000000"
-                        level="H"
-                      />
+                      <QRCode value={getQRData(ticket)} size={96} bgColor="#ffffff" fgColor="#000000" level="H" />
                       <p className="text-xs text-gray-500 mt-1">QR код билета</p>
                       <p className="text-xs text-gray-600 mt-1">{ticket.qr_code?.substring(0, 8)}</p>
                     </div>
@@ -214,53 +225,73 @@ export default function ProfilePage() {
           )
         )}
 
-        {/* Архив билетов */}
         {activeTab === 'archived' && (
-          archivedTickets.length === 0 ? (
-            <div className="bg-gray-800 rounded-xl p-12 text-center">
-              <div className="text-6xl mb-4">📦</div>
-              <p className="text-gray-400 text-lg">У вас нет архивных билетов</p>
+  archivedTickets.length === 0 ? (
+    <div className="bg-gray-800 rounded-xl p-12 text-center">
+      <svg className="w-16 h-16 mx-auto mb-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+      </svg>
+      <p className="text-gray-400 text-lg">У вас нет архивных билетов</p>
+    </div>
+  ) : (
+    <div className="space-y-4">
+      {archivedTickets.map((ticket) => (
+        <div key={ticket.id} className="bg-gray-800/50 rounded-xl p-6 opacity-75">
+          <div className="flex flex-wrap justify-between items-start gap-4">
+            <div className="flex-1">
+              <div className="flex items-center gap-3 mb-2">
+                <h3 className="text-xl font-bold text-gray-300">{ticket.film_name}</h3>
+                <span className="bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded-full">
+                  {ticket.is_past ? 'Просмотрен' : 'Архивный'}
+                </span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
+                <p className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {new Date(ticket.session_time).toLocaleDateString('ru-RU', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                  })}
+                </p>
+                <p className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  {new Date(ticket.session_time).toLocaleTimeString('ru-RU', {
+                    hour: '2-digit', minute: '2-digit'
+                  })}
+                </p>
+                <p className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                  </svg>
+                  {ticket.hall_name}
+                </p>
+                <p className="flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  Ряд {ticket.row_number}, Место {ticket.seat_number}
+                </p>
+                <p className="text-gray-400 flex items-center gap-1">
+                  <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 0a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 4a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" />
+                  </svg>
+                  {Number(ticket.price).toFixed(2)} ₽
+                </p>
+              </div>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {archivedTickets.map((ticket) => (
-                <div key={ticket.id} className="bg-gray-800/50 rounded-xl p-6 opacity-75">
-                  <div className="flex flex-wrap justify-between items-start gap-4">
-                    <div className="flex-1">
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-xl font-bold text-gray-300">{ticket.film_name}</h3>
-                        <span className="bg-gray-600 text-gray-300 text-xs px-2 py-1 rounded-full">
-                          {ticket.is_past ? 'Просмотрен' : 'Архивный'}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-500">
-                        <p>📅 {new Date(ticket.session_time).toLocaleDateString('ru-RU', {
-                          day: 'numeric', month: 'long', year: 'numeric'
-                        })}</p>
-                        <p>⏰ {new Date(ticket.session_time).toLocaleTimeString('ru-RU', {
-                          hour: '2-digit', minute: '2-digit'
-                        })}</p>
-                        <p>🏠 {ticket.hall_name}</p>
-                        <p>💺 Ряд {ticket.row_number}, Место {ticket.seat_number}</p>
-                        <p className="text-gray-400">💰 {Number(ticket.price).toFixed(2)} ₽</p>
-                      </div>
-                    </div>
-                    <div className="text-center opacity-50">
-                      <QRCode 
-                        value={getQRData(ticket)}
-                        size={96}
-                        bgColor="#ffffff"
-                        fgColor="#000000"
-                        level="H"
-                      />
-                      <p className="text-xs text-gray-500 mt-1">Билет использован</p>
-                    </div>
-                  </div>
-                </div>
-              ))}
+            <div className="text-center opacity-50">
+              <QRCode value={getQRData(ticket)} size={96} bgColor="#ffffff" fgColor="#000000" level="H" />
+              <p className="text-xs text-gray-500 mt-1">Билет использован</p>
             </div>
-          )
-        )}
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+)}
       </div>
     </div>
   );

@@ -1,4 +1,3 @@
-// src/pages/LoginPage.tsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
@@ -16,41 +15,26 @@ export default function LoginPage() {
     setError('');
 
     try {
-      console.log('1. Sending login request...');
       const response = await authAPI.login(email, password);
-      console.log('2. Response received:', response);
-      
       const { access, refresh } = response.data;
-      console.log('3. Access token:', access?.substring(0, 50) + '...');
       
-      console.log('4. Saving tokens...');
       localStorage.setItem('access_token', access);
       localStorage.setItem('refresh_token', refresh);
       
-      // Проверяем сразу после сохранения
       const savedAccess = localStorage.getItem('access_token');
-      console.log('5. Saved access token:', savedAccess ? 'YES' : 'NO');
-      
       if (!savedAccess) {
-        console.error('❌ Token not saved!');
         setError('Ошибка сохранения токена');
         setLoading(false);
         return;
       }
       
-      console.log('6. Tokens saved successfully!');
-      
       const from = localStorage.getItem('redirectAfterLogin') || '/';
       localStorage.removeItem('redirectAfterLogin');
       
-      console.log('7. Navigating to:', from);
-      // Используем navigate вместо window.location.href
       navigate(from);
-      // Принудительно перезагружаем, чтобы обновить состояние навбара
       window.location.reload();
       
     } catch (err: any) {
-      console.error('❌ Login error:', err);
       setError(err.response?.data?.detail || 'Неверный email или пароль');
     } finally {
       setLoading(false);
@@ -66,8 +50,8 @@ export default function LoginPage() {
         </div>
 
         {error && (
-          <div className="bg-blue-900/50 border border-blue-600 rounded-lg p-3 mb-6">
-            <p className="text-blue-400 text-sm">{error}</p>
+          <div className="bg-red-900/50 border border-red-600 rounded-lg p-3 mb-6">
+            <p className="text-red-400 text-sm">{error}</p>
           </div>
         )}
 
@@ -78,7 +62,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               placeholder="example@mail.com"
               required
             />
@@ -90,10 +74,16 @@ export default function LoginPage() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               placeholder="Введите пароль"
               required
             />
+          </div>
+
+          <div className="text-right">
+            <Link to="/forgot-password" className="text-sm text-blue-400 hover:text-blue-300 transition">
+              Забыли пароль?
+            </Link>
           </div>
 
           <button

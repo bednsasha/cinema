@@ -13,6 +13,8 @@ import ProfilePage from './pages/ProfilePage';
 import MoviesPage from './pages/MoviesPage';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import ResetPasswordPage from './pages/ResetPasswordPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 gsap.registerPlugin(ScrollTrigger);
 const meta = document.createElement('meta');
 meta.name = 'viewport';
@@ -36,6 +38,8 @@ function App() {
         <Route path="/payment" element={<PaymentPage />} />
 <Route path="/payment/success" element={<PaymentSuccessPage />} />
       <Route path="/profile" element={<ProfilePage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+<Route path="/reset-password" element={<ResetPasswordPage />} />
       
       </Routes>
       </div>

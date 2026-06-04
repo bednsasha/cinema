@@ -1,4 +1,3 @@
-// src/pages/MovieDetailPage.tsx
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { movieAPI, sessionAPI } from '../services/api';
@@ -21,7 +20,6 @@ export default function MovieDetailPage() {
         .then(([movieRes, sessionsRes]) => {
           setMovie(movieRes.data);
           
-          // Фильтруем только будущие сеансы (сегодня и позже)
           const now = new Date();
           now.setHours(0, 0, 0, 0);
           
@@ -40,7 +38,6 @@ export default function MovieDetailPage() {
     }
   }, [id]);
 
-  // Группируем сеансы по датам
   const groupedSessions = sessions.reduce((acc, session) => {
     const sessionDate = new Date(session.start_time);
     const today = new Date();
@@ -103,11 +100,16 @@ export default function MovieDetailPage() {
     );
   }
 
+  const posterUrl = movie.poster 
+    ? movie.poster.startsWith('http') 
+      ? movie.poster 
+      : `http://127.0.0.1:8000${movie.poster}`
+    : 'https://via.placeholder.com/300x400/1a1a1a/ffffff?text=No+Poster';
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black">
-      {/* Hero секция */}
       <div className="relative h-[500px] bg-cover bg-center" style={{
-        backgroundImage: movie.poster ? `url(${movie.poster})` : 'none',
+        backgroundImage: `url(${posterUrl})`,
         backgroundColor: '#1a1a2e'
       }}>
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900 via-gray-900/70 to-transparent" />
@@ -115,17 +117,11 @@ export default function MovieDetailPage() {
         <div className="relative container mx-auto px-6 h-full flex items-end pb-12">
           <div className="flex flex-col md:flex-row gap-8 items-start">
             <div className="w-48 md:w-64 rounded-xl overflow-hidden shadow-2xl">
-              {movie.poster ? (
-                <img 
-                  src={movie.poster} 
-                  alt={movie.name}
-                  className="w-full h-auto"
-                />
-              ) : (
-                <div className="w-full h-80 bg-gray-700 flex items-center justify-center">
-                  <span className="text-gray-500">Нет постера</span>
-                </div>
-              )}
+              <img 
+                src={posterUrl}
+                alt={movie.name}
+                className="w-full h-auto"
+              />
             </div>
             
             <div className="flex-1">
@@ -138,7 +134,7 @@ export default function MovieDetailPage() {
                   </span>
                 )}
                 <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-bold">
-                  {movie.age_limit_display}
+                  {movie.age_limit_display || movie.age_limit || '0+'}
                 </span>
                 <span className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm">
                   {movie.duration} мин
@@ -170,7 +166,7 @@ export default function MovieDetailPage() {
           <div className="lg:col-span-2">
             <h2 className="text-2xl font-bold text-white mb-4">О фильме</h2>
             <p className="text-gray-300 leading-relaxed whitespace-pre-line">
-              {movie.description}
+              {movie.description || 'Описание отсутствует'}
             </p>
             
             {movie.trailer_url && (
@@ -182,7 +178,10 @@ export default function MovieDetailPage() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 text-blue-500 hover:text-blue-400 transition"
                 >
-                  <span>▶ Смотреть трейлер</span>
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 0a10 10 0 1 0 0 20 10 10 0 0 0 0-20zM8 15V5l6 5-6 5z" />
+                  </svg>
+                  Смотреть трейлер
                 </a>
               </div>
             )}
@@ -217,7 +216,6 @@ export default function MovieDetailPage() {
 
                   <div className="space-y-3">
                     {filteredSessions.map((session) => {
-                      // Проверяем, завершен ли сеанс
                       const sessionDate = new Date(session.start_time);
                       const now = new Date();
                       const isPast = sessionDate < now;

@@ -1,4 +1,3 @@
-// src/pages/RegisterPage.tsx
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authAPI } from '../services/api';
@@ -43,7 +42,6 @@ export default function RegisterPage() {
     }
 
     try {
-      // Простая регистрация
       await authAPI.register({
         email: formData.email,
         phone: formData.phone,
@@ -55,22 +53,16 @@ export default function RegisterPage() {
         receive_newsletter: formData.receive_newsletter,
       });
       
-      // После успешной регистрации - логиним
       const loginResponse = await authAPI.login(formData.email, formData.password);
       const { access, refresh } = loginResponse.data;
       
       authAPI.setTokens(access, refresh);
-      
       navigate('/');
     } catch (err: any) {
-      console.error('Registration error:', err);
-      
       if (err.response?.status === 400) {
         const errorData = err.response.data;
-        
         if (typeof errorData === 'object') {
           setFieldErrors(errorData);
-          
           const messages: string[] = [];
           Object.entries(errorData).forEach(([field, errors]) => {
             if (Array.isArray(errors)) {
@@ -100,8 +92,8 @@ export default function RegisterPage() {
         </div>
 
         {error && (
-          <div className="bg-blue-900/50 border border-blue-600 rounded-lg p-3 mb-6">
-            <p className="text-blue-400 text-sm">{error}</p>
+          <div className="bg-red-900/50 border border-red-600 rounded-lg p-3 mb-6">
+            <p className="text-red-400 text-sm">{error}</p>
           </div>
         )}
 
@@ -113,11 +105,11 @@ export default function RegisterPage() {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               required
             />
             {fieldErrors.email && (
-              <p className="text-blue-400 text-xs mt-1">{fieldErrors.email.join(', ')}</p>
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.email.join(', ')}</p>
             )}
           </div>
 
@@ -129,11 +121,11 @@ export default function RegisterPage() {
               value={formData.phone}
               onChange={handleChange}
               placeholder="+7 XXX XXX XX XX"
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               required
             />
             {fieldErrors.phone && (
-              <p className="text-blue-400 text-xs mt-1">{fieldErrors.phone.join(', ')}</p>
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.phone.join(', ')}</p>
             )}
           </div>
 
@@ -144,11 +136,11 @@ export default function RegisterPage() {
               name="first_name"
               value={formData.first_name}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               required
             />
             {fieldErrors.first_name && (
-              <p className="text-blue-400 text-xs mt-1">{fieldErrors.first_name.join(', ')}</p>
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.first_name.join(', ')}</p>
             )}
           </div>
 
@@ -159,11 +151,11 @@ export default function RegisterPage() {
               name="last_name"
               value={formData.last_name}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               required
             />
             {fieldErrors.last_name && (
-              <p className="text-blue-400 text-xs mt-1">{fieldErrors.last_name.join(', ')}</p>
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.last_name.join(', ')}</p>
             )}
           </div>
 
@@ -174,7 +166,7 @@ export default function RegisterPage() {
               name="patronimic"
               value={formData.patronimic}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
             />
           </div>
 
@@ -185,11 +177,11 @@ export default function RegisterPage() {
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               required
             />
             {fieldErrors.password && (
-              <p className="text-blue-400 text-xs mt-1">{fieldErrors.password.join(', ')}</p>
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.password.join(', ')}</p>
             )}
           </div>
 
@@ -200,11 +192,11 @@ export default function RegisterPage() {
               name="confirm_password"
               value={formData.confirm_password}
               onChange={handleChange}
-              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-white"
+              className="w-full px-4 py-3 bg-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-white"
               required
             />
             {fieldErrors.confirm_password && (
-              <p className="text-blue-400 text-xs mt-1">{fieldErrors.confirm_password.join(', ')}</p>
+              <p className="text-red-400 text-xs mt-1">{fieldErrors.confirm_password.join(', ')}</p>
             )}
           </div>
 
@@ -214,7 +206,7 @@ export default function RegisterPage() {
               name="receive_newsletter"
               checked={formData.receive_newsletter}
               onChange={handleChange}
-              className="w-4 h-4"
+              className="w-4 h-4 rounded border-gray-600 text-blue-500 focus:ring-blue-500"
             />
             <span className="text-sm text-gray-300">Получать новости и акции</span>
           </label>

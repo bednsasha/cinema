@@ -20,14 +20,13 @@ const SessionsPage: React.FC = () => {
   const fetchData = async () => {
     try {
       const [sessionsRes, movieRes] = await Promise.all([
-        sessionAPI.getByFilm(Number(movieId)),  // ← изменено с getByMovie на getByFilm
+        sessionAPI.getByFilm(Number(movieId)),
         movieAPI.getById(Number(movieId))
       ]);
       
       setSessions(sessionsRes.data);
       setMovie(movieRes.data);
       
-      // Анимация
       gsap.fromTo('.sessions-container',
         { opacity: 0 },
         { opacity: 1, duration: 0.6, ease: 'power2.out' }
@@ -39,7 +38,6 @@ const SessionsPage: React.FC = () => {
     }
   };
 
-  // Группировка сеансов по датам
   const groupedSessions = sessions.reduce((acc, session) => {
     const date = new Date(session.start_time).toLocaleDateString('ru-RU');
     if (!acc[date]) acc[date] = [];
@@ -56,7 +54,7 @@ const SessionsPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-screen">
-        <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-blue-500"></div>
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-500"></div>
       </div>
     );
   }
@@ -64,7 +62,6 @@ const SessionsPage: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black py-20">
       <div className="container mx-auto px-6">
-        {/* Movie Info */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
@@ -84,7 +81,6 @@ const SessionsPage: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Date Picker */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -123,7 +119,6 @@ const SessionsPage: React.FC = () => {
           </div>
         </motion.div>
 
-        {/* Sessions Grid */}
         <AnimatePresence>
           <motion.div
             key={selectedDate}
